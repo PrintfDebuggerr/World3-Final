@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useGameState } from './useGameState';
 import { useFirebase } from './useFirebase';
 import { GameRoom, GameMode, GuessHistory } from '../types/game';
@@ -31,6 +31,8 @@ export function useWordleDuo() {
     updateRoomInDatabase,
     setupRoomListener
   } = useFirebase();
+
+
 
   // Create a new room
   const createRoom = useCallback(async (gameMode: GameMode, playerName: string) => {

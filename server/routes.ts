@@ -40,11 +40,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(room);
   });
 
+  // REST API for rooms
+  app.get("/api/rooms/:code", (req, res) => {
+    const { code } = req.params;
+    const room = gameRooms.get(code.toUpperCase());
+    
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+    
+    res.json(room);
+  });
+
+  app.put("/api/rooms/:code", (req, res) => {
+    const { code } = req.params;
+    const roomData = req.body;
+    
+    gameRooms.set(code.toUpperCase(), roomData);
+    broadcastToRoom(code.toUpperCase(), { type: 'room_update', room: roomData });
+    
+    res.json(roomData);
+  });
+
+  app.patch("/api/rooms/:code", (req, res) => {
+    const { code } = req.params;
+    const updates = req.body;
+    const existing = gameRooms.get(code.toUpperCase());
+    
+    if (!existing) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+    
+    const updated = { ...existing, ...updates };
+    gameRooms.set(code.toUpperCase(), updated);
+    broadcastToRoom(code.toUpperCase(), { type: 'room_update', room: updated });
+    
+    res.json(updated);
+  });
+
   // Create HTTP server
   const httpServer = createServer(app);
 
-  // Set up WebSocket server on a separate port
-  const wss = new WebSocketServer({ port: 3001, host: '0.0.0.0' });
+  // Set up WebSocket server on the same server
+  const wss = new WebSocketServer({ server: httpServer });
 
   wss.on('connection', (ws: WebSocket) => {
     console.log('New WebSocket connection');

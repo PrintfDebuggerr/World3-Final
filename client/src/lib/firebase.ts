@@ -9,63 +9,47 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:demo"
 };
 
-// Browser-based persistent storage for development
+// Backend-based storage using REST API
 class MockFirebase {
-  private storageKey = 'wordle-duo-rooms';
   private listeners: Map<string, Function[]> = new Map();
+  private intervals: Map<string, NodeJS.Timeout> = new Map();
 
   async init() {
-    console.log('Firebase initialized (mock mode)');
-    this.syncWithStorage();
-  }
-
-  private getRooms(): Map<string, any> {
-    try {
-      const stored = localStorage.getItem(this.storageKey);
-      if (stored) {
-        const roomsArray = JSON.parse(stored);
-        return new Map(roomsArray);
-      }
-    } catch (error) {
-      console.error('Error loading rooms from storage:', error);
-    }
-    return new Map();
-  }
-
-  private saveRooms(rooms: Map<string, any>) {
-    try {
-      const roomsArray = Array.from(rooms.entries());
-      localStorage.setItem(this.storageKey, JSON.stringify(roomsArray));
-    } catch (error) {
-      console.error('Error saving rooms to storage:', error);
-    }
-  }
-
-  private syncWithStorage() {
-    // Poll for changes from other tabs every 1 second
-    setInterval(() => {
-      const currentRooms = this.getRooms();
-      currentRooms.forEach((data, path) => {
-        this.notifyListeners(path, data);
-      });
-    }, 1000);
+    console.log('Firebase initialized (backend mode)');
   }
 
   ref(path: string) {
     return {
       set: async (data: any) => {
-        const rooms = this.getRooms();
-        rooms.set(path, data);
-        this.saveRooms(rooms);
-        this.notifyListeners(path, data);
+        const roomCode = path.replace('rooms/', '');
+        try {
+          const response = await fetch(`/api/rooms/${roomCode}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          if (!response.ok) throw new Error('Failed to save room');
+          this.notifyListeners(path, data);
+        } catch (error) {
+          console.error('Error saving room:', error);
+          throw error;
+        }
       },
       update: async (data: any) => {
-        const rooms = this.getRooms();
-        const existing = rooms.get(path) || {};
-        const updated = { ...existing, ...data };
-        rooms.set(path, updated);
-        this.saveRooms(rooms);
-        this.notifyListeners(path, updated);
+        const roomCode = path.replace('rooms/', '');
+        try {
+          const response = await fetch(`/api/rooms/${roomCode}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          if (!response.ok) throw new Error('Failed to update room');
+          const updated = await response.json();
+          this.notifyListeners(path, updated);
+        } catch (error) {
+          console.error('Error updating room:', error);
+          throw error;
+        }
       },
       on: (event: string, callback: Function) => {
         if (!this.listeners.has(path)) {
@@ -73,12 +57,24 @@ class MockFirebase {
         }
         this.listeners.get(path)!.push(callback);
         
-        // Immediately call with existing data
-        const rooms = this.getRooms();
-        const data = rooms.get(path);
-        if (data) {
-          callback({ val: () => data });
-        }
+        // Start polling for changes
+        const roomCode = path.replace('rooms/', '');
+        const poll = async () => {
+          try {
+            const response = await fetch(`/api/rooms/${roomCode}`);
+            if (response.ok) {
+              const data = await response.json();
+              callback({ val: () => data });
+            }
+          } catch (error) {
+            console.error('Error polling room:', error);
+          }
+        };
+        
+        // Poll immediately and then every 2 seconds
+        poll();
+        const intervalId = setInterval(poll, 2000);
+        this.intervals.set(path, intervalId);
         
         return callback;
       },
@@ -90,11 +86,28 @@ class MockFirebase {
             pathListeners.splice(index, 1);
           }
         }
+        
+        // Clear polling interval
+        const intervalId = this.intervals.get(path);
+        if (intervalId) {
+          clearInterval(intervalId);
+          this.intervals.delete(path);
+        }
       },
       once: async (event: string) => {
-        const rooms = this.getRooms();
-        const data = rooms.get(path);
-        return { val: () => data };
+        const roomCode = path.replace('rooms/', '');
+        try {
+          const response = await fetch(`/api/rooms/${roomCode}`);
+          if (response.ok) {
+            const data = await response.json();
+            return { val: () => data };
+          } else {
+            return { val: () => null };
+          }
+        } catch (error) {
+          console.error('Error fetching room:', error);
+          return { val: () => null };
+        }
       }
     };
   }
