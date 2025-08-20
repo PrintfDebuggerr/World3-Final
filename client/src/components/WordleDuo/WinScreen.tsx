@@ -36,10 +36,19 @@ export function WinScreen() {
   const isWinner = lastGuess?.result.every((status: any) => status === 'correct');
   const winner = isWinner ? lastGuess : null;
   
-  // Get current player from localStorage or first available player
-  const storedPlayerId = localStorage.getItem('wordle-duo-player-id');
+  // Get current player from localStorage or use playerData
+  const storedPlayerId = localStorage.getItem('wordle-duo-player-id') || gameState.playerData?.id;
   const currentPlayer = gameState.roomData.players.find(p => p.id === storedPlayerId);
   const isCurrentPlayerWinner = winner && winner.playerId === storedPlayerId;
+  
+  console.log('Win Screen Debug:', {
+    lastGuess,
+    isWinner,
+    winner,
+    storedPlayerId,
+    currentPlayer,
+    isCurrentPlayerWinner
+  });
 
   return (
     <motion.div

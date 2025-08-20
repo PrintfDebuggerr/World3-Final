@@ -63,6 +63,8 @@ export const useGameState = create<GameStore>()(
         lastSeen: Date.now()
       };
       set({ playerData: player });
+      // Store player ID in localStorage for persistence
+      localStorage.setItem('wordle-duo-player-id', player.id);
       return player;
     },
 
