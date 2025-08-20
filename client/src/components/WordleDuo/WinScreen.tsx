@@ -31,10 +31,15 @@ export function WinScreen() {
 
   if (!gameState.roomData) return null;
 
-  // Determine winner
+  // Determine winner and current player
   const lastGuess = gameState.roomData.gameHistory[gameState.roomData.gameHistory.length - 1];
   const isWinner = lastGuess?.result.every((status: any) => status === 'correct');
   const winner = isWinner ? lastGuess : null;
+  
+  // Get current player from localStorage or first available player
+  const storedPlayerId = localStorage.getItem('wordle-duo-player-id');
+  const currentPlayer = gameState.roomData.players.find(p => p.id === storedPlayerId);
+  const isCurrentPlayerWinner = winner && winner.playerId === storedPlayerId;
 
   return (
     <motion.div
@@ -51,14 +56,15 @@ export function WinScreen() {
           className="mb-8"
         >
           <div className="text-8xl mb-4">
-            {winner ? '🎉' : '😔'}
+            {isCurrentPlayerWinner ? '🎉' : winner ? '😔' : '🤝'}
           </div>
           <h2 className="text-4xl font-bold text-white mb-4">
-            {winner ? 'Tebrikler!' : 'Oyun Bitti'}
+            {isCurrentPlayerWinner ? 'Tebrikler!' : winner ? 'Kaybettiniz!' : 'Oyun Bitti'}
           </h2>
           {winner && (
             <p className="text-xl text-gray-300 mb-4">
-              <span className="text-2xl">{winner.playerAvatar}</span> {winner.playerName} kazandı!
+              <span className="text-2xl">{winner.playerAvatar}</span> {winner.playerName} 
+              {isCurrentPlayerWinner ? ' (Sen) kazandın!' : ' kazandı!'}
             </p>
           )}
         </motion.div>

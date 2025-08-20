@@ -266,6 +266,14 @@ export function useWordleDuo() {
     submitGuess,
     handleKeyPress,
     setError,
-    resetGame: () => setPhase('menu')
+    resetGame: () => {
+      // Clear localStorage
+      localStorage.removeItem('wordle-duo-player-id');
+      localStorage.removeItem('wordle-duo-room-code');
+      
+      // Reset game state completely
+      const gameStateStore = useGameState.getState();
+      gameStateStore.resetGame();
+    }
   };
 }
