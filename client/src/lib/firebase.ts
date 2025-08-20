@@ -9,25 +9,62 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:demo"
 };
 
-// Mock Firebase implementation for development
+// Browser-based persistent storage for development
 class MockFirebase {
-  private rooms: Map<string, any> = new Map();
+  private storageKey = 'wordle-duo-rooms';
   private listeners: Map<string, Function[]> = new Map();
 
   async init() {
     console.log('Firebase initialized (mock mode)');
+    this.syncWithStorage();
+  }
+
+  private getRooms(): Map<string, any> {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      if (stored) {
+        const roomsArray = JSON.parse(stored);
+        return new Map(roomsArray);
+      }
+    } catch (error) {
+      console.error('Error loading rooms from storage:', error);
+    }
+    return new Map();
+  }
+
+  private saveRooms(rooms: Map<string, any>) {
+    try {
+      const roomsArray = Array.from(rooms.entries());
+      localStorage.setItem(this.storageKey, JSON.stringify(roomsArray));
+    } catch (error) {
+      console.error('Error saving rooms to storage:', error);
+    }
+  }
+
+  private syncWithStorage() {
+    // Poll for changes from other tabs every 1 second
+    setInterval(() => {
+      const currentRooms = this.getRooms();
+      currentRooms.forEach((data, path) => {
+        this.notifyListeners(path, data);
+      });
+    }, 1000);
   }
 
   ref(path: string) {
     return {
       set: async (data: any) => {
-        this.rooms.set(path, data);
+        const rooms = this.getRooms();
+        rooms.set(path, data);
+        this.saveRooms(rooms);
         this.notifyListeners(path, data);
       },
       update: async (data: any) => {
-        const existing = this.rooms.get(path) || {};
+        const rooms = this.getRooms();
+        const existing = rooms.get(path) || {};
         const updated = { ...existing, ...data };
-        this.rooms.set(path, updated);
+        rooms.set(path, updated);
+        this.saveRooms(rooms);
         this.notifyListeners(path, updated);
       },
       on: (event: string, callback: Function) => {
@@ -37,7 +74,8 @@ class MockFirebase {
         this.listeners.get(path)!.push(callback);
         
         // Immediately call with existing data
-        const data = this.rooms.get(path);
+        const rooms = this.getRooms();
+        const data = rooms.get(path);
         if (data) {
           callback({ val: () => data });
         }
@@ -54,7 +92,8 @@ class MockFirebase {
         }
       },
       once: async (event: string) => {
-        const data = this.rooms.get(path);
+        const rooms = this.getRooms();
+        const data = rooms.get(path);
         return { val: () => data };
       }
     };

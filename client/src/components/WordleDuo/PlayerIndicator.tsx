@@ -5,7 +5,7 @@ import { useWordleDuo } from '../../hooks/useWordleDuo';
 export function PlayerIndicator() {
   const { gameState } = useWordleDuo();
 
-  if (!gameState.roomData) return null;
+  if (!gameState.roomData?.players) return null;
 
   return (
     <div className="flex items-center space-x-2">
