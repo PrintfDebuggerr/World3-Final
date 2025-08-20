@@ -71,9 +71,9 @@ class MockFirebase {
           }
         };
         
-        // Poll immediately and then every 2 seconds
+        // Poll immediately and then every 500ms for faster updates
         poll();
-        const intervalId = setInterval(poll, 2000);
+        const intervalId = setInterval(poll, 500);
         this.intervals.set(path, intervalId);
         
         return callback;

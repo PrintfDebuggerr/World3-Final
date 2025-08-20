@@ -40,7 +40,13 @@ export const useGameState = create<GameStore>()(
     setMode: (mode) => set({ mode }),
     setPlayerData: (playerData) => set({ playerData }),
     setRoomCode: (roomCode) => set({ roomCode }),
-    setRoomData: (roomData) => set({ roomData }),
+    setRoomData: (roomData) => {
+      set({ roomData });
+      // Auto-update phase based on room status
+      if (roomData?.status === 'playing' && get().phase === 'waiting') {
+        set({ phase: 'playing' });
+      }
+    },
     setCurrentInput: (currentInput) => set({ currentInput }),
     setCurrentRow: (currentRow) => set({ currentRow }),
     setIsMyTurn: (isMyTurn) => set({ isMyTurn }),
