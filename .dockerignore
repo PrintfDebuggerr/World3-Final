@@ -15,3 +15,8 @@ formatted_words_clean.txt
 clean_words.txt
 dist
 migrations
+*.log
+*.tmp
+*.cache
+.DS_Store
+Thumbs.db

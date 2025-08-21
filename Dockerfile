@@ -1,5 +1,5 @@
-# Multi-stage build for optimization
-FROM node:18-alpine AS builder
+# Use Node.js 18 Alpine for smaller image size
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
@@ -7,29 +7,17 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies (including dev dependencies for build)
-RUN npm ci
+# Install dependencies with memory optimization
+RUN npm ci --no-audit --no-fund --prefer-offline
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the application with memory optimization
+RUN NODE_OPTIONS="--max-old-space-size=512" npm run build
 
-# Production stage
-FROM node:18-alpine AS production
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm ci --only=production
-
-# Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
+# Remove dev dependencies to reduce image size
+RUN npm prune --production
 
 # Expose port
 EXPOSE 5001
