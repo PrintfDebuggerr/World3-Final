@@ -1,6 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./simple-routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 const app = express();
 app.use(express.json());
@@ -37,6 +41,16 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Run database migration on startup
+  try {
+    log("Running database migration...");
+    await execAsync("npm run db:push");
+    log("Database migration completed successfully");
+  } catch (error) {
+    log(`Database migration failed: ${error}`);
+    // Continue anyway - app might work without migration
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
