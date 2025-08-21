@@ -9,6 +9,8 @@
     "restartPolicyMaxRetries": 10
   },
   "variables": {
-    "NODE_OPTIONS": "--max-old-space-size=1024"
+    "NODE_OPTIONS": "--max-old-space-size=1024",
+    "npm_config_platform": "linux",
+    "npm_config_arch": "x64"
   }
 }

@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (simplified)
-RUN npm install
+# Install dependencies with platform fix
+RUN npm install --platform=linux --arch=x64
 
 # Copy source code
 COPY . .
