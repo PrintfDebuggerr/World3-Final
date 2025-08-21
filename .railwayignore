@@ -1,0 +1,14 @@
+node_modules
+.git
+.env.local
+.env.development
+*.log
+dist
+migrations
+.local/
+temp_words.txt
+words_clean.txt
+words_formatted.txt
+words_organized.txt
+formatted_words_clean.txt
+clean_words.txt
