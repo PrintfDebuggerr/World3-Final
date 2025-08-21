@@ -5,9 +5,24 @@ export function checkLetterStatus(guess: string, targetWord: string): LetterStat
   const targetLetters = targetWord.split('');
   const guessLetters = guess.split('');
   
+  // Special easter egg for "DENİZ" 🥰
+  if (guess === 'DENİZ') {
+    // Trigger special animation flag
+    (window as any).denizEasterEgg = true;
+  }
+  
+  // Helper function to compare Turkish letters properly
+  const isSameLetter = (letter1: string, letter2: string): boolean => {
+    // Exact match first
+    if (letter1 === letter2) return true;
+    
+    // I and İ are completely different letters in Turkish - never equal
+    return false;
+  };
+  
   // First pass: Mark correct positions (green)
   for (let i = 0; i < 5; i++) {
-    if (guessLetters[i] === targetLetters[i]) {
+    if (isSameLetter(guessLetters[i], targetLetters[i])) {
       result[i] = 'correct';
       targetLetters[i] = ''; // Mark as used
       guessLetters[i] = ''; // Mark as processed
@@ -17,7 +32,7 @@ export function checkLetterStatus(guess: string, targetWord: string): LetterStat
   // Second pass: Mark present but wrong position (yellow)
   for (let i = 0; i < 5; i++) {
     if (guessLetters[i] !== '') {
-      const foundIndex = targetLetters.findIndex(letter => letter === guessLetters[i]);
+      const foundIndex = targetLetters.findIndex(letter => isSameLetter(letter, guessLetters[i]));
       if (foundIndex !== -1) {
         result[i] = 'present';
         targetLetters[foundIndex] = ''; // Mark as used
@@ -74,11 +89,14 @@ export function updateKeyboardStatus(
     const letter = guess[i];
     const status = result[i];
     
+    // Handle Turkish I/İ separately in keyboard status
+    let keyToUpdate = letter;
+    
     // Only update if new status is better than current
-    if (!newStatus[letter] || 
-        (newStatus[letter] === 'absent' && status !== 'absent') ||
-        (newStatus[letter] === 'present' && status === 'correct')) {
-      newStatus[letter] = status;
+    if (!newStatus[keyToUpdate] || 
+        (newStatus[keyToUpdate] === 'absent' && status !== 'absent') ||
+        (newStatus[keyToUpdate] === 'present' && status === 'correct')) {
+      newStatus[keyToUpdate] = status;
     }
   }
   

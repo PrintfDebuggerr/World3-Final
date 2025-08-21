@@ -225,3 +225,44 @@
 .confetti {
   animation: confetti-fall 3s linear infinite;
 }
+
+/* Special heart animation for DENİZ word 💕 */
+@keyframes floating-heart {
+  0% {
+    transform: translateY(100vh) rotate(0deg) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(80vh) rotate(180deg) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(20vh) rotate(360deg) scale(1.2);
+  }
+  100% {
+    transform: translateY(-20vh) rotate(720deg) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.floating-heart {
+  animation: floating-heart linear infinite;
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Special glow effect for DENİZ word */
+.deniz-special {
+  animation: denizGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes denizGlow {
+  0% {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 40px rgba(236, 72, 153, 0.8), 0 0 60px rgba(236, 72, 153, 0.4);
+  }
+}

@@ -1,17 +1,15 @@
 import React, { Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from './components/WordleDuo/ErrorBoundary';
 import { MainMenu } from './components/WordleDuo/MainMenu';
 import { GameBoard } from './components/WordleDuo/GameBoard';
-import { useGameState } from './hooks/useGameState';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import './styles/animations.css';
 
 const queryClient = new QueryClient();
 
-function GameContainer() {
-  const gameState = useGameState();
-
+function AppLayout() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
       {/* Background Pattern */}
@@ -22,31 +20,26 @@ function GameContainer() {
         }}></div>
       </div>
 
-      <AnimatePresence mode="wait">
-        {gameState.phase === 'menu' && (
+      <Routes>
+        <Route path="/" element={
           <motion.div
-            key="menu"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
             <MainMenu />
           </motion.div>
-        )}
-
-        {(gameState.phase === 'waiting' || gameState.phase === 'playing' || gameState.phase === 'finished') && (
+        } />
+        <Route path="/room/:roomCode" element={
           <motion.div
-            key="game"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
           >
             <GameBoard />
           </motion.div>
-        )}
-      </AnimatePresence>
+        } />
+      </Routes>
     </div>
   );
 }
@@ -60,7 +53,7 @@ function App() {
             <div className="text-white text-xl">Yükleniyor...</div>
           </div>
         }>
-          <GameContainer />
+          <AppLayout />
         </Suspense>
       </ErrorBoundary>
     </QueryClientProvider>

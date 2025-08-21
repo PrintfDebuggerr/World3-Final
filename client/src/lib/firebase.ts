@@ -23,7 +23,7 @@ class MockFirebase {
       set: async (data: any) => {
         const roomCode = path.replace('rooms/', '');
         try {
-          const response = await fetch(`/api/rooms/${roomCode}`, {
+          const response = await fetch(`http://localhost:5001/api/rooms/${roomCode}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -38,7 +38,7 @@ class MockFirebase {
       update: async (data: any) => {
         const roomCode = path.replace('rooms/', '');
         try {
-          const response = await fetch(`/api/rooms/${roomCode}`, {
+          const response = await fetch(`http://localhost:5001/api/rooms/${roomCode}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -61,7 +61,7 @@ class MockFirebase {
         const roomCode = path.replace('rooms/', '');
         const poll = async () => {
           try {
-            const response = await fetch(`/api/rooms/${roomCode}`);
+            const response = await fetch(`http://localhost:5001/api/rooms/${roomCode}`);
             if (response.ok) {
               const data = await response.json();
               callback({ val: () => data });
@@ -97,7 +97,7 @@ class MockFirebase {
       once: async (event: string) => {
         const roomCode = path.replace('rooms/', '');
         try {
-          const response = await fetch(`/api/rooms/${roomCode}`);
+          const response = await fetch(`http://localhost:5001/api/rooms/${roomCode}`);
           if (response.ok) {
             const data = await response.json();
             return { val: () => data };

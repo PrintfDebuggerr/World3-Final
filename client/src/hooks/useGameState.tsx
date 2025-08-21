@@ -8,7 +8,7 @@ interface GameStore extends GameState {
   setPhase: (phase: GameState['phase']) => void;
   setMode: (mode: GameMode) => void;
   setPlayerData: (playerData: Player) => void;
-  setRoomCode: (roomCode: string) => void;
+  setRoomCode: (roomCode: string | null) => void;
   setRoomData: (roomData: GameRoom | null) => void;
   setCurrentInput: (input: string) => void;
   setCurrentRow: (row: number) => void;

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGameState } from './useGameState';
 import { useFirebase } from './useFirebase';
 import { GameRoom, GameMode, GuessHistory } from '../types/game';
@@ -11,7 +12,10 @@ import {
 import { selectRandomWord, selectDifferentWords, isValidWord } from '../lib/turkishWords';
 
 export function useWordleDuo() {
+  const navigate = useNavigate();
+  const params = useParams();
   const gameState = useGameState();
+  const hasResetForNewGameRef = useRef(false);
   const {
     setPhase,
     setMode,
@@ -32,6 +36,42 @@ export function useWordleDuo() {
     setupRoomListener
   } = useFirebase();
 
+  // Handle URL room code
+  useEffect(() => {
+    const roomCodeFromURL = params.roomCode;
+    if (roomCodeFromURL && roomCodeFromURL !== gameState.roomCode) {
+      // Load room from URL parameter
+      const loadRoom = async () => {
+        try {
+          const room = await getRoomFromDatabase(roomCodeFromURL);
+          if (room) {
+            setRoomCode(roomCodeFromURL);
+            setRoomData(room);
+            setMode(room.mode);
+            
+            // Set appropriate phase based on room status
+            if (room.status === 'waiting') {
+              setPhase('waiting');
+            } else if (room.status === 'playing') {
+              setPhase('playing');
+            } else if (room.status === 'finished') {
+              setPhase('finished');
+            }
+          } else {
+            // Room not found, redirect to home
+            navigate('/');
+            setError('Oda bulunamadı');
+          }
+        } catch (error) {
+          console.error('Error loading room from URL:', error);
+          navigate('/');
+          setError('Oda yüklenemedi');
+        }
+      };
+      
+      loadRoom();
+    }
+  }, [params.roomCode, gameState.roomCode, getRoomFromDatabase, setRoomCode, setRoomData, setMode, setPhase, navigate, setError]);
 
 
   // Create a new room
@@ -47,7 +87,7 @@ export function useWordleDuo() {
       
       if (gameMode === 'duel') {
         [player1Word, player2Word] = selectDifferentWords();
-        word = player1Word; // Host gets first word
+        word = player1Word; // Her iki oyuncu da aynı kelimeyi alır
       } else {
         word = selectRandomWord();
       }
@@ -74,13 +114,16 @@ export function useWordleDuo() {
       setRoomData(roomData);
       setPhase('waiting');
       
+      // Navigate to room URL
+      navigate(`/room/${roomCode}`);
+      
       return roomCode;
     } catch (error) {
       console.error('Error creating room:', error);
       setError('Oda oluşturulamadı');
       throw error;
     }
-  }, [createPlayer, saveRoomToDatabase, setMode, setRoomCode, setRoomData, setPhase, setError]);
+  }, [createPlayer, saveRoomToDatabase, setMode, setRoomCode, setRoomData, setPhase, setError, navigate]);
 
   // Join an existing room
   const joinRoom = useCallback(async (roomCode: string, playerName: string) => {
@@ -119,13 +162,16 @@ export function useWordleDuo() {
       setRoomData(updatedRoom);
       setPhase('playing');
       
+      // Navigate to room URL
+      navigate(`/room/${roomCode}`);
+      
       return updatedRoom;
     } catch (error) {
       console.error('Error joining room:', error);
       setError(error instanceof Error ? error.message : 'Odaya katılamadı');
       throw error;
     }
-  }, [getRoomFromDatabase, createPlayer, updateRoomInDatabase, setMode, setRoomCode, setRoomData, setPhase, setError]);
+  }, [getRoomFromDatabase, createPlayer, updateRoomInDatabase, setMode, setRoomCode, setRoomData, setPhase, setError, navigate]);
 
   // Submit a guess
   const submitGuess = useCallback(async () => {
@@ -180,6 +226,33 @@ export function useWordleDuo() {
         await updateRoomInDatabase(gameState.roomCode, updates);
         setPhase('finished');
       } else {
+        // Check if duel mode game should end (6 attempts reached)
+        if (gameState.roomData.mode === 'duel') {
+          const myGuesses = gameState.roomData.gameHistory.filter(
+            (h: any) => h.playerId === gameState.playerData.id
+          );
+          
+          // If this player has reached 6 attempts, check if opponent also has 6 attempts
+          if (myGuesses.length >= 5) { // 0-5 = 6 attempts
+            const opponentGuesses = gameState.roomData.gameHistory.filter(
+              (h: any) => h.playerId !== gameState.playerData.id
+            );
+            
+            // If both players have 6 attempts, end the game
+            if (opponentGuesses.length >= 5) {
+              const updates: Partial<GameRoom> = {
+                gameHistory: [...gameState.roomData.gameHistory, guessEntry],
+                status: 'finished'
+              };
+              
+              await updateRoomInDatabase(gameState.roomCode, updates);
+              setPhase('finished');
+              setCurrentInput('');
+              return;
+            }
+          }
+        }
+        
         // Continue game
         const updates: Partial<GameRoom> = {
           gameHistory: [...gameState.roomData.gameHistory, guessEntry],
@@ -230,10 +303,58 @@ export function useWordleDuo() {
       }
     } else if (key === 'BACKSPACE') {
       setCurrentInput(gameState.currentInput.slice(0, -1));
-    } else if (gameState.currentInput.length < 5 && /^[A-ZÇĞIİÖŞÜ]$/.test(key)) {
-      setCurrentInput(gameState.currentInput + key);
+    } else if (gameState.currentInput.length < 5 && /^[A-ZÇĞIİÖŞÜa-zçğıiöşü]$/.test(key)) {
+      // Convert Turkish characters properly before adding to input
+      const turkishUpperKey = key
+        .replace(/i/g, 'İ')  // i → İ
+        .replace(/ı/g, 'I')  // ı → I
+        .toUpperCase();
+      setCurrentInput(gameState.currentInput + turkishUpperKey);
     }
   }, [gameState, submitGuess, setCurrentInput]);
+
+  // Define startNewGameFromRequest before it's used
+  const startNewGameFromRequest = useCallback(async () => {
+    if (!gameState.roomCode || !gameState.roomData) return;
+    
+    try {
+      // Generate new word(s)
+      let newWord: string;
+      let newPlayer1Word: string | undefined;
+      let newPlayer2Word: string | undefined;
+      
+      if (gameState.roomData.mode === 'duel') {
+        [newPlayer1Word, newPlayer2Word] = selectDifferentWords();
+        newWord = newPlayer1Word; // Her iki oyuncu da aynı kelimeyi alır
+      } else {
+        newWord = selectRandomWord();
+      }
+      
+      // Reset game state
+      const updates: Partial<GameRoom> = {
+        status: 'playing',
+        word: newWord,
+        player1Word: newPlayer1Word,
+        player2Word: newPlayer2Word,
+        currentTurn: 0,
+        gameHistory: [],
+        totalRows: 1,
+        newGameRequests: [] // Reset requests
+      };
+      
+      await updateRoomInDatabase(gameState.roomCode, updates);
+      
+      // Update local state
+      setCurrentRow(0);
+      setCurrentInput('');
+      setKeyboardStatus({});
+      setPhase('playing');
+      
+    } catch (error) {
+      console.error('Error starting new game from request:', error);
+      setError('Yeni oyun başlatılamadı');
+    }
+  }, [gameState.roomCode, gameState.roomData, updateRoomInDatabase, setCurrentRow, setCurrentInput, setKeyboardStatus, setPhase, setError]);
 
   // Set up room listener
   useEffect(() => {
@@ -241,6 +362,7 @@ export function useWordleDuo() {
 
     const unsubscribe = setupRoomListener(gameState.roomCode, (roomData) => {
       if (roomData) {
+
         setRoomData(roomData);
         
         // Update turn indicator
@@ -249,15 +371,41 @@ export function useWordleDuo() {
           setIsMyTurn(isMyTurn);
         }
         
-        // Check game phase
+        // Update keyboard status from all game history (including other players' moves)
+        if (roomData.gameHistory && roomData.gameHistory.length > 0) {
+          let newKeyboardStatus = {};
+          for (const entry of roomData.gameHistory) {
+            newKeyboardStatus = updateKeyboardStatus(
+              newKeyboardStatus,
+              entry.guess,
+              entry.result
+            );
+          }
+          setKeyboardStatus(newKeyboardStatus);
+        }
+        
+        // Check game phase transitions
         if (roomData.status === 'finished' && gameState.phase !== 'finished') {
           setPhase('finished');
+          hasResetForNewGameRef.current = false; // Reset flag when game finishes
+        } else if (roomData.status === 'playing' && gameState.phase === 'finished') {
+          // Game restarted - reset local state and go back to playing
+          // Only reset ONCE if it's actually a new game (totalRows=1, no history)
+          if (roomData.totalRows === 1 && roomData.gameHistory.length === 0 && !hasResetForNewGameRef.current) {
+            setCurrentRow(0);
+            setCurrentInput('');
+            setKeyboardStatus({});
+            hasResetForNewGameRef.current = true; // Mark that we've reset for this new game
+          }
+          setPhase('playing');
+        } else if (roomData.status === 'playing' && gameState.phase !== 'playing') {
+          setPhase('playing');
         }
       }
     });
 
     return unsubscribe;
-  }, [gameState.roomCode, gameState.playerData, gameState.phase, setupRoomListener, setRoomData, setIsMyTurn, setPhase]);
+  }, [gameState.roomCode, gameState.playerData, gameState.phase, setupRoomListener, setRoomData, setIsMyTurn, setPhase, setCurrentRow, setCurrentInput, setKeyboardStatus, updateKeyboardStatus]);
 
   return {
     gameState,
@@ -266,6 +414,61 @@ export function useWordleDuo() {
     submitGuess,
     handleKeyPress,
     setError,
+    requestNewGame: async () => {
+      if (!gameState.roomCode || !gameState.roomData || !gameState.playerData) {
+        return;
+      }
+
+      try {
+        // Oyun zaten başlamışsa işlem yapma
+        if (gameState.roomData.status === 'playing') {
+          return;
+        }
+
+        const currentRequests = gameState.roomData.newGameRequests || [];
+        const playerId = gameState.playerData.id;
+        
+        // Eğer oyuncu zaten istek göndermişse, işlemi iptal et
+        if (currentRequests.includes(playerId)) {
+          const updatedRequests = currentRequests.filter(id => id !== playerId);
+          await updateRoomInDatabase(gameState.roomCode, {
+            newGameRequests: updatedRequests
+          });
+        } else {
+          // Her iki oyuncu da istek göndermişse (kendisi hariç), oyunu başlat
+          if (currentRequests.length === gameState.roomData.players.length - 1) {
+            // Diğer tüm oyuncular istek göndermiş, direkt oyunu başlat
+            await startNewGameFromRequest();
+          } else {
+            // Normal istek gönderme
+            const updatedRequests = [...currentRequests, playerId];
+            await updateRoomInDatabase(gameState.roomCode, {
+              newGameRequests: updatedRequests
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error requesting new game:', error);
+        setError('Yeni oyun isteği gönderilemedi');
+      }
+    },
+    
+    startNewGame: async () => {
+      try {
+        // Clear current game state
+        const gameStateStore = useGameState.getState();
+        gameStateStore.resetGame();
+        
+        // Set phase to menu to show game mode selector
+        setPhase('menu');
+      } catch (error) {
+        console.error('Error starting new game:', error);
+        setError('Yeni oyun başlatılamadı');
+      }
+    },
+    
+    startNewGameFromRequest,
+    
     resetGame: () => {
       // Clear localStorage
       localStorage.removeItem('wordle-duo-player-id');
@@ -274,6 +477,12 @@ export function useWordleDuo() {
       // Reset game state completely
       const gameStateStore = useGameState.getState();
       gameStateStore.resetGame();
+      
+      // Set phase to menu to return to main menu
+      setPhase('menu');
+      
+      // Navigate to home
+      navigate('/');
     }
   };
 }

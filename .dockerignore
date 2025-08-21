@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.railwayignore
+railway.json
+.local
+temp_words.txt
+words_clean.txt
+words_formatted.txt
+words_organized.txt
+formatted_words_clean.txt
+clean_words.txt
+dist
+migrations

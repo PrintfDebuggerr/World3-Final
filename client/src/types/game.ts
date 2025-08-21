@@ -24,6 +24,7 @@ export interface GameRoom {
   createdAt: number;
   gameHistory: GuessHistory[];
   totalRows: number;
+  newGameRequests?: string[]; // Oyuncu ID'leri
 }
 
 export interface GuessHistory {

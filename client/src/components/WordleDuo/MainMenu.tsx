@@ -43,12 +43,12 @@ export function MainMenu() {
       >
         {/* Logo and Title */}
         <motion.div variants={itemVariants} className="mb-12">
-          <div className="text-8xl mb-4">🇹🇷</div>
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent mb-4">
-            WORDLE DUO
+          <div className="text-8xl mb-6 animate-bounce">🎯</div>
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4 tracking-wider">
+            WORDL3
           </h1>
-          <p className="text-xl text-gray-300">
-            Arkadaşlarınızla Türkçe kelime tahmin oyunu
+          <p className="text-xl text-gray-300 text-center max-w-lg mx-auto leading-relaxed">
+            Arkadaşlarınızla birlikte 5 harfli kelimeleri tahmin edin ve eğlenceli bir oyun deneyimi yaşayın! 🚀
           </p>
         </motion.div>
 
@@ -56,39 +56,41 @@ export function MainMenu() {
         <motion.div variants={itemVariants} className="space-y-4 max-w-md mx-auto">
           <button
             onClick={() => setMenuState('create')}
-            className="w-full glass-card rounded-2xl p-6 text-left hover:scale-105 transition-transform group"
+            className="w-full glass-card rounded-2xl p-6 text-left hover:scale-105 transition-all duration-300 group hover:shadow-2xl hover:shadow-blue-500/25"
           >
             <div className="flex items-center">
-              <div className="text-4xl mr-4">🎮</div>
+              <div className="text-4xl mr-4 group-hover:rotate-12 transition-transform duration-300">✨</div>
               <div>
-                <h3 className="text-xl font-bold text-white">Oda Oluştur</h3>
-                <p className="text-gray-300">Yeni bir oyun odası aç</p>
+                <h3 className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors">Oda Oluştur</h3>
+                <p className="text-gray-300 group-hover:text-gray-200 transition-colors">Yeni bir oyun odası aç ve arkadaşlarını davet et</p>
               </div>
             </div>
           </button>
 
           <button
             onClick={() => setMenuState('join')}
-            className="w-full glass-card rounded-2xl p-6 text-left hover:scale-105 transition-transform group"
+            className="w-full glass-card rounded-2xl p-6 text-left hover:scale-105 transition-all duration-300 group hover:shadow-2xl hover:shadow-green-500/25"
           >
             <div className="flex items-center">
-              <div className="text-4xl mr-4">🚪</div>
+              <div className="text-4xl mr-4 group-hover:scale-110 transition-transform duration-300">🚀</div>
               <div>
-                <h3 className="text-xl font-bold text-white">Odaya Katıl</h3>
-                <p className="text-gray-300">Mevcut bir odaya katıl</p>
+                <h3 className="text-xl font-bold text-white group-hover:text-green-300 transition-colors">Odaya Katıl</h3>
+                <p className="text-gray-300 group-hover:text-gray-200 transition-colors">Arkadaşının odasına katıl ve hemen oynamaya başla</p>
               </div>
             </div>
           </button>
 
-          <div className="glass-card rounded-2xl p-6">
+          <div className="glass-card rounded-2xl p-6 hover:shadow-2xl hover:shadow-purple-500/25 transition-all duration-300">
             <div className="flex items-center justify-center">
-              <div className="text-4xl mr-4">ℹ️</div>
+              <div className="text-4xl mr-4 animate-pulse">📚</div>
               <div className="text-center">
-                <h3 className="text-xl font-bold text-white mb-2">Nasıl Oynanır?</h3>
-                <p className="text-sm text-gray-300">
-                  5 harfli Türkçe kelimeleri tahmin edin. Yeşil = doğru harf ve konum, 
-                  Sarı = doğru harf yanlış konum, Gri = yanlış harf.
-                </p>
+                <h3 className="text-xl font-bold text-white mb-3">Nasıl Oynanır?</h3>
+                <div className="space-y-2 text-sm text-gray-300">
+                  <p>🎯 5 harfli Türkçe kelimeleri tahmin edin</p>
+                  <p>🟢 <span className="text-green-400">Yeşil</span> = Doğru harf, doğru konum</p>
+                  <p>🟡 <span className="text-yellow-400">Sarı</span> = Doğru harf, yanlış konum</p>
+                  <p>⚫ <span className="text-gray-400">Gri</span> = Yanlış harf</p>
+                </div>
               </div>
             </div>
           </div>
@@ -96,7 +98,10 @@ export function MainMenu() {
 
         {/* Footer */}
         <motion.div variants={itemVariants} className="mt-12 text-gray-400 text-sm">
-          <p>Made with ❤️ for Turkish word game lovers</p>
+          <div className="flex items-center justify-center space-x-2">
+            <span className="animate-pulse">🌟</span>
+            <span className="animate-pulse">🌟</span>
+          </div>
         </motion.div>
       </motion.div>
     </div>
