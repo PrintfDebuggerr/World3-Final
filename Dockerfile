@@ -16,6 +16,9 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Run database migration
+RUN npm run db:push
+
 # Expose port
 EXPOSE 5001
 

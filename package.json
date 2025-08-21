@@ -7,7 +7,7 @@
     "dev": "tsx server/index.ts",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --minify --target=node18",
     "build:prod": "npm run build",
-    "start": "NODE_ENV=production node dist/index.js",
+    "start": "NODE_ENV=production npm run db:push && node dist/index.js",
     "postinstall": "echo 'Build will be done in Docker'",
     "check": "tsc",
     "db:push": "drizzle-kit push"
