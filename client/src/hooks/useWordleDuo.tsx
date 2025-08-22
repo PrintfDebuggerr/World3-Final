@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGameState } from './useGameState';
-import { useFirebase } from './useFirebase';
+import { useBackendAPI } from './useFirebase';
 import { GameRoom, GameMode, GuessHistory } from '../types/game';
 import { 
   generateRoomCode, 
@@ -34,7 +34,7 @@ export function useWordleDuo() {
     getRoomFromDatabase,
     updateRoomInDatabase,
     setupRoomListener
-  } = useFirebase();
+  } = useBackendAPI();
 
   // Handle URL room code
   useEffect(() => {
