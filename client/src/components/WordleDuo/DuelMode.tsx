@@ -89,13 +89,21 @@ export function DuelMode() {
           </div>
         </div>
 
-        {/* Scrollable Grid Container */}
-        <div className="flex-1 overflow-y-auto px-4 pb-4">
+        {/* Grid Container - Different behavior for mobile vs desktop */}
+        <div className={`flex-1 ${
+          isMobile 
+            ? 'overflow-y-scroll px-4 pb-4 min-h-0' // Mobile: scrollable with min-height
+            : 'px-4 pb-4' // Desktop: no scroll needed
+        }`}>
           {/* Dual Grid Layout - Responsive for both orientations */}
           <div className={`grid ${
-            isMobile && orientation === 'landscape' 
-              ? 'grid-cols-2 gap-4' 
-              : 'grid-cols-1 gap-6'
+            // Desktop: always horizontal layout
+            !isMobile 
+              ? 'grid-cols-2 gap-8' 
+              : // Mobile: responsive to orientation
+              isMobile && orientation === 'landscape' 
+                ? 'grid-cols-2 gap-4' 
+                : 'grid-cols-1 gap-6'
           }`}>
             {/* My Grid */}
             <motion.div
