@@ -28,16 +28,3 @@ canvas {
   height: 100% !important;
   touch-action: none;
 }
-
-/* Scroll container styles */
-.scroll-container {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch; /* iOS için smooth scroll */
-}
-
-/* Mobilde klavye açıldığında daha iyi scroll */
-@media (max-width: 768px) {
-  .scroll-container {
-    scroll-padding-bottom: 20px;
-  }
-}

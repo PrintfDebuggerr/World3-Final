@@ -48,6 +48,11 @@ export function LetterGrid({
     
     // Mobilde kendi klavyesi açılsın ve sürekli açık kalsın
     if (isMobile) {
+      // Mevcut scroll pozisyonunu kaydet
+      const currentScrollTop = window.scrollY;
+      const scrollContainer = document.querySelector('.scroll-container');
+      const containerScrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
+      
       // Input field oluştur ve focus et
       const input = document.createElement('input');
       input.type = 'text';
@@ -97,32 +102,18 @@ export function LetterGrid({
         }
       };
       
-      // Klavye açıldığında otomatik scroll yap
+      // Focus olduktan sonra scroll pozisyonunu geri yükle
       input.onfocus = () => {
-        // Kısa bir gecikme ile scroll yap (klavye açıldıktan sonra)
+        // Kısa bir gecikme ile scroll pozisyonunu geri yükle
         setTimeout(() => {
-          // Scroll container'ı bul
-          const scrollContainer = document.querySelector('.scroll-container');
+          // Sayfa scroll pozisyonunu geri yükle
+          window.scrollTo(0, currentScrollTop);
+          
+          // Container scroll pozisyonunu geri yükle
           if (scrollContainer) {
-            // Scroll container'ın en altına git
-            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+            scrollContainer.scrollTop = containerScrollTop;
           }
-          
-          // Alternatif olarak, sayfanın en altına git
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: 'smooth'
-          });
-          
-          // Ek olarak, viewport'u da ayarla
-          if ('visualViewport' in window) {
-            const viewport = (window as any).visualViewport;
-            if (viewport) {
-              // Viewport'u en alta kaydır
-              viewport.scrollTop = viewport.scrollTop + 100;
-            }
-          }
-        }, 300); // 300ms gecikme ile klavyenin açılmasını bekle
+        }, 50);
       };
       
       document.body.appendChild(input);
