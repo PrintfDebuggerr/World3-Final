@@ -56,7 +56,7 @@ export function GameBoard() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
       {/* Exit Confirmation Modal */}
       <AnimatePresence>
         {showExitConfirm && (
