@@ -97,6 +97,34 @@ export function LetterGrid({
         }
       };
       
+      // Klavye açıldığında otomatik scroll yap
+      input.onfocus = () => {
+        // Kısa bir gecikme ile scroll yap (klavye açıldıktan sonra)
+        setTimeout(() => {
+          // Scroll container'ı bul
+          const scrollContainer = document.querySelector('.scroll-container');
+          if (scrollContainer) {
+            // Scroll container'ın en altına git
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          }
+          
+          // Alternatif olarak, sayfanın en altına git
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+          });
+          
+          // Ek olarak, viewport'u da ayarla
+          if ('visualViewport' in window) {
+            const viewport = (window as any).visualViewport;
+            if (viewport) {
+              // Viewport'u en alta kaydır
+              viewport.scrollTop = viewport.scrollTop + 100;
+            }
+          }
+        }, 300); // 300ms gecikme ile klavyenin açılmasını bekle
+      };
+      
       document.body.appendChild(input);
       input.focus();
     }

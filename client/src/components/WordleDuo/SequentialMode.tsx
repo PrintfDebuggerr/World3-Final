@@ -70,12 +70,12 @@ export function SequentialMode() {
           )}
         </div>
 
-        {/* Game Grid - Scrollable */}
-        <div className="flex-1 min-h-0" style={{ maxHeight: '320px' }}>
-          <div 
-            ref={scrollContainerRef}
-            className="h-full overflow-y-auto space-y-1 sm:space-y-2 pr-1 sm:pr-2 scroll-smooth"
-          >
+        {/* Game Grid */}
+        <div 
+          ref={scrollContainerRef}
+          className="scroll-container flex-1 overflow-y-auto space-y-4 p-4"
+          style={{ maxHeight: '60vh' }}
+        >
           {gridRows.map((row, index) => (
             <motion.div
               key={`${row.playerId}-${row.rowIndex}`}
@@ -130,7 +130,6 @@ export function SequentialMode() {
               </div>
             </motion.div>
           )}
-          </div>
         </div>
 
         {/* Instructions - Fixed */}
