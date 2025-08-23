@@ -1,37 +1,54 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useWordleDuo } from '../../hooks/useWordleDuo';
 import { LetterGrid } from './LetterGrid';
+import { useOrientation } from '../../hooks/useOrientation';
 
 export function SequentialMode() {
   const { gameState } = useWordleDuo();
+  const { isMobile } = useOrientation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new rows are added
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [gameState.roomData?.gameHistory]);
 
   if (!gameState.roomData) return null;
 
-  // Create grid from game history only
-  const gridRows = [...gameState.roomData.gameHistory];
+  // Create grid rows from game history
+  const gridRows = gameState.roomData.gameHistory.map((entry: any) => ({
+    playerId: entry.playerId,
+    playerName: gameState.roomData!.players.find((p: any) => p.id === entry.playerId)?.name || 'Unknown',
+    playerAvatar: gameState.roomData!.players.find((p: any) => p.id === entry.playerId)?.avatar || '👤',
+    guess: entry.guess,
+    result: entry.result,
+    rowIndex: entry.rowIndex
+  }));
 
-  // Auto-scroll to bottom when new entries are added
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      const scrollContainer = scrollContainerRef.current;
-      scrollContainer.scrollTop = scrollContainer.scrollHeight;
-    }
-  }, [gridRows.length]);
+  // Handle letter click for current input
+  const handleLetterClick = (index: number) => {
+    if (!gameState.isMyTurn) return;
+    
+    // Bu fonksiyon useWordleDuo'dan gelecek
+    // Şimdilik sadece console'a yazdıralım
+    console.log(`Letter clicked at index: ${index}`);
+  };
 
   return (
-    <div className="flex flex-col p-2 sm:p-4 min-h-0 h-full">
+    <div className="h-full flex flex-col">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-2xl mx-auto flex flex-col min-h-0 h-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex-1 flex flex-col space-y-4 p-4"
       >
-        {/* Turn Indicator - Fixed */}
-        <div className="flex-shrink-0 mb-3 sm:mb-6 text-center">
-          <div className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-2 sm:mb-4">
-            <h3 className="text-base sm:text-lg font-bold text-white mb-2">Sırayla Modu</h3>
-            <div className="flex items-center justify-center space-x-2 sm:space-x-4">
+        {/* Turn Indicator */}
+        <div className="flex-shrink-0">
+          <div className="text-center mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Sıra Kimde?</h2>
+            <div className="flex justify-center space-x-2 sm:space-x-4">
               {gameState.roomData.players.map((player: any, index: number) => (
                 <div
                   key={player.id}
@@ -116,6 +133,8 @@ export function SequentialMode() {
                   }
                   statuses={Array(5).fill('empty')}
                   animate={false}
+                  interactive={true} // Tıklanabilir yap
+                  onLetterClick={handleLetterClick} // Harf tıklama callback'i
                 />
               </div>
             </motion.div>
@@ -126,6 +145,11 @@ export function SequentialMode() {
         {/* Instructions - Fixed */}
         <div className="flex-shrink-0 mt-3 sm:mt-6 text-center text-gray-400 text-xs sm:text-sm">
           <p>Her oyuncu sırayla 5 harfli Türkçe kelime tahmin eder</p>
+          {isMobile && gameState.isMyTurn && (
+            <p className="mt-2 text-blue-400">
+              💡 Harf kutucuklarına tıklayarak yazabilirsiniz!
+            </p>
+          )}
         </div>
       </motion.div>
     </div>

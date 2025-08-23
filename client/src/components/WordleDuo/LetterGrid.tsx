@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { LetterStatus } from '../../types/game';
+import { useOrientation } from '../../hooks/useOrientation';
 
 interface LetterGridProps {
   letters: string[];
@@ -8,9 +9,22 @@ interface LetterGridProps {
   animate?: boolean;
   compact?: boolean;
   enlarged?: boolean;
+  interactive?: boolean; // Yeni prop: tıklanabilir mi?
+  onLetterClick?: (index: number) => void; // Yeni prop: harf tıklama callback'i
 }
 
-export function LetterGrid({ letters, statuses, animate = false, compact = false, enlarged = false }: LetterGridProps) {
+export function LetterGrid({ 
+  letters, 
+  statuses, 
+  animate = false, 
+  compact = false, 
+  enlarged = false,
+  interactive = false,
+  onLetterClick
+}: LetterGridProps) {
+  const { isMobile } = useOrientation();
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+
   // Check if this is the special "DENİZ" word
   const isDenizWord = letters.join('') === 'DENİZ' && animate;
   
@@ -25,6 +39,50 @@ export function LetterGrid({ letters, statuses, animate = false, compact = false
     if (compact) return 'w-8 h-8 text-sm';
     if (enlarged) return 'w-10 h-10 text-base'; // Daha küçük ama okunabilir
     return 'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-lg sm:text-xl md:text-2xl';
+  };
+
+  const handleLetterClick = (index: number) => {
+    if (!interactive) return;
+    
+    setFocusedIndex(index);
+    
+    // Mobilde kendi klavyesi açılsın
+    if (isMobile) {
+      // Input field oluştur ve focus et
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.style.position = 'absolute';
+      input.style.left = '-9999px';
+      input.style.opacity = '0';
+      input.maxLength = 1;
+      
+      input.oninput = (e) => {
+        const target = e.target as HTMLInputElement;
+        const value = target.value.toUpperCase();
+        
+        if (/^[A-ZÇĞIİÖŞÜ]$/.test(value)) {
+          // Harfi ekle
+          if (onLetterClick) {
+            onLetterClick(index);
+          }
+        }
+        
+        // Input'u temizle ve kaldır
+        target.value = '';
+        document.body.removeChild(target);
+        setFocusedIndex(null);
+      };
+      
+      input.onblur = () => {
+        if (document.body.contains(input)) {
+          document.body.removeChild(input);
+        }
+        setFocusedIndex(null);
+      };
+      
+      document.body.appendChild(input);
+      input.focus();
+    }
   };
 
   return (
@@ -43,6 +101,7 @@ export function LetterGrid({ letters, statuses, animate = false, compact = false
             delay: index * (isDenizWord ? 0.2 : 0.1),
             ease: "easeInOut"
           } : undefined}
+          onClick={() => handleLetterClick(index)}
           className={`
             letter-cell ${getSizeClass()} border-2 rounded-md sm:rounded-lg flex items-center justify-center font-bold transition-all duration-200
             ${statuses[index] === 'correct' ? 'correct' : ''}
@@ -50,24 +109,26 @@ export function LetterGrid({ letters, statuses, animate = false, compact = false
             ${statuses[index] === 'absent' ? 'absent' : ''}
             ${statuses[index] === 'empty' ? 'empty' : ''}
             ${isDenizWord ? 'shadow-lg shadow-pink-300' : ''}
+            ${interactive ? 'cursor-pointer hover:scale-105 hover:bg-white/10' : ''}
+            ${focusedIndex === index ? 'ring-2 ring-blue-500 bg-blue-500/20' : ''}
           `}
           style={{
             transformStyle: 'preserve-3d',
           }}
         >
-                           <motion.span
-                   initial={animate ? { opacity: 1, scale: 1 } : false}
-                   animate={animate ? {
-                     opacity: [1, 0, 1],
-                     scale: isDenizWord ? [1, 1.3, 1] : 1,
-                     rotate: isDenizWord ? [0, 10, -10, 0] : 0
-                   } : false}
-                   transition={animate ? {
-                     duration: isDenizWord ? 1.2 : 0.6,
-                     delay: index * (isDenizWord ? 0.2 : 0.1),
-                     times: [0, 0.5, 1]
-                   } : undefined}
-                 >
+          <motion.span
+            initial={animate ? { opacity: 1, scale: 1 } : false}
+            animate={animate ? {
+              opacity: [1, 0, 1],
+              scale: isDenizWord ? [1, 1.3, 1] : 1,
+              rotate: isDenizWord ? [0, 10, -10, 0] : 0
+            } : false}
+            transition={animate ? {
+              duration: isDenizWord ? 1.2 : 0.6,
+              delay: index * (isDenizWord ? 0.2 : 0.1),
+              times: [0, 0.5, 1]
+            } : undefined}
+          >
             {letter === ' ' ? '' : letter}
           </motion.span>
         </motion.div>
