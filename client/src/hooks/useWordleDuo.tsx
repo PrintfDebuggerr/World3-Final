@@ -313,6 +313,21 @@ export function useWordleDuo() {
     }
   }, [gameState, submitGuess, setCurrentInput]);
 
+  // Handle letter click for specific position
+  const handleLetterClick = useCallback((index: number) => {
+    if (!gameState.roomData || !gameState.playerData) return;
+
+    // Check if it's player's turn (for sequential mode)
+    if (gameState.roomData.mode === 'sequential') {
+      const isMyTurn = gameState.roomData.players[gameState.roomData.currentTurn]?.id === gameState.playerData.id;
+      if (!isMyTurn) return;
+    }
+
+    // Bu fonksiyon mobil input'tan gelecek
+    // Şimdilik sadece console'a yazdıralım
+    console.log(`Letter clicked at position: ${index}`);
+  }, [gameState]);
+
   // Define startNewGameFromRequest before it's used
   const startNewGameFromRequest = useCallback(async () => {
     if (!gameState.roomCode || !gameState.roomData) return;
@@ -413,6 +428,7 @@ export function useWordleDuo() {
     joinRoom,
     submitGuess,
     handleKeyPress,
+    handleLetterClick,
     setError,
     requestNewGame: async () => {
       if (!gameState.roomCode || !gameState.roomData || !gameState.playerData) {

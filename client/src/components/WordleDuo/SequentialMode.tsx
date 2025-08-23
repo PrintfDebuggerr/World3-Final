@@ -5,7 +5,7 @@ import { LetterGrid } from './LetterGrid';
 import { useOrientation } from '../../hooks/useOrientation';
 
 export function SequentialMode() {
-  const { gameState } = useWordleDuo();
+  const { gameState, handleLetterClick } = useWordleDuo();
   const { isMobile } = useOrientation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -27,15 +27,6 @@ export function SequentialMode() {
     result: entry.result,
     rowIndex: entry.rowIndex
   }));
-
-  // Handle letter click for current input
-  const handleLetterClick = (index: number) => {
-    if (!gameState.isMyTurn) return;
-    
-    // Bu fonksiyon useWordleDuo'dan gelecek
-    // Şimdilik sadece console'a yazdıralım
-    console.log(`Letter clicked at index: ${index}`);
-  };
 
   return (
     <div className="h-full flex flex-col">

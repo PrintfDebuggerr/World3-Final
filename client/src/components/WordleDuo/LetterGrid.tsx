@@ -46,7 +46,7 @@ export function LetterGrid({
     
     setFocusedIndex(index);
     
-    // Mobilde kendi klavyesi açılsın
+    // Mobilde kendi klavyesi açılsın ve sürekli açık kalsın
     if (isMobile) {
       // Input field oluştur ve focus et
       const input = document.createElement('input');
@@ -65,19 +65,36 @@ export function LetterGrid({
           if (onLetterClick) {
             onLetterClick(index);
           }
+          
+          // Otomatik olarak bir sonraki kutucuğa geç
+          const nextIndex = index + 1;
+          if (nextIndex < 5) {
+            // Bir sonraki kutucuğa focus ol
+            setFocusedIndex(nextIndex);
+            
+            // Input'u temizle ve yeni kutucuk için hazırla
+            target.value = '';
+            
+            // Kısa bir gecikme ile sonraki kutucuğa geç
+            setTimeout(() => {
+              if (onLetterClick) {
+                onLetterClick(nextIndex);
+              }
+            }, 100);
+          } else {
+            // Son kutucuk dolduruldu, input'u kapat
+            target.value = '';
+            document.body.removeChild(target);
+            setFocusedIndex(null);
+          }
         }
-        
-        // Input'u temizle ve kaldır
-        target.value = '';
-        document.body.removeChild(target);
-        setFocusedIndex(null);
       };
       
       input.onblur = () => {
+        // Klavye kapanmasın, sadece input'u gizle
         if (document.body.contains(input)) {
-          document.body.removeChild(input);
+          input.style.display = 'none';
         }
-        setFocusedIndex(null);
       };
       
       document.body.appendChild(input);
