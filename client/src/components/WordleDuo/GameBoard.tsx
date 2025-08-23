@@ -189,7 +189,7 @@ export function GameBoard() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-4 left-4 right-4 max-w-md mx-auto"
+            className="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-50"
           >
             <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 text-red-300 text-center">
               {gameState.error}

@@ -76,8 +76,8 @@ export function Interface() {
         </div>
       )}
       
-      {/* Instructions panel */}
-      <div className="fixed bottom-4 left-4 z-10">
+      {/* Instructions panel - Hidden for Wordle game */}
+      {/* <div className="fixed bottom-4 left-4 z-10">
         <Card className="w-auto max-w-xs bg-background/80 backdrop-blur-sm">
           <CardContent className="p-4">
             <h3 className="font-medium mb-2">Controls:</h3>
@@ -89,7 +89,7 @@ export function Interface() {
             </ul>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </>
   );
 }

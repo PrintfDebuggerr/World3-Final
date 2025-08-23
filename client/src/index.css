@@ -14,6 +14,8 @@
     overflow: hidden;
     width: 100vw;
     height: 100vh;
+    /* Mobile viewport height fix for link bar */
+    height: 100dvh;
   }
 }
 
@@ -21,6 +23,8 @@
   width: 100%;
   height: 100%;
   position: fixed;
+  /* Mobile viewport height fix */
+  height: 100dvh;
 }
 
 canvas {
