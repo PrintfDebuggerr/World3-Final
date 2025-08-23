@@ -5,7 +5,7 @@ import { useOrientation } from '../../hooks/useOrientation';
 import { LetterGrid } from './LetterGrid';
 
 export function DuelMode() {
-  const { gameState } = useWordleDuo();
+  const { gameState, handleLetterClick } = useWordleDuo();
   const { orientation, isMobile } = useOrientation();
 
   if (!gameState.roomData || !gameState.playerData) return null;
@@ -55,7 +55,7 @@ export function DuelMode() {
   );
 
   // Create 6 rows for each player
-  const createPlayerGrid = (guesses: any[], showLetters: boolean) => {
+  const createPlayerGrid = (guesses: any[], showLetters: boolean, isCurrentPlayer: boolean = false) => {
     const rows = [];
     
     for (let i = 0; i < 6; i++) {
@@ -65,22 +65,25 @@ export function DuelMode() {
         rows.push({
           letters,
           statuses: guess.result,
-          animate: true
+          animate: true,
+          interactive: false
         });
-      } else if (i === guesses.length && showLetters && gameState.currentInput) {
-        // Current input row
+      } else if (i === guesses.length && showLetters && gameState.currentInput && isCurrentPlayer) {
+        // Current input row - make it interactive
         const letters = gameState.currentInput.padEnd(5, ' ').split('');
         rows.push({
           letters,
           statuses: Array(5).fill('empty'),
-          animate: false
+          animate: false,
+          interactive: true
         });
       } else {
         // Empty row
         rows.push({
           letters: ['', '', '', '', ''],
           statuses: Array(5).fill('empty'),
-          animate: false
+          animate: false,
+          interactive: false
         });
       }
     }
@@ -88,8 +91,8 @@ export function DuelMode() {
     return rows;
   };
 
-  const myGrid = createPlayerGrid(myGuesses, true);
-  const opponentGrid = createPlayerGrid(opponentGuesses, false);
+  const myGrid = createPlayerGrid(myGuesses, true, true); // true for isCurrentPlayer
+  const opponentGrid = createPlayerGrid(opponentGuesses, false, false);
 
   return (
     <div className={`flex-1 ${isMobile && orientation === 'landscape' ? 'p-0.5' : 'p-2 sm:p-4'}`}>
@@ -143,6 +146,8 @@ export function DuelMode() {
                     statuses={row.statuses}
                     animate={row.animate}
                     enlarged={isMobile && orientation === 'landscape'}
+                    interactive={row.interactive}
+                    onLetterClick={row.interactive ? handleLetterClick : undefined}
                   />
                 ))}
               </div>
@@ -178,6 +183,10 @@ export function DuelMode() {
                     statuses={row.statuses}
                     animate={row.animate}
                     enlarged={isMobile && orientation === 'landscape'}
+                    interactive={row.interactive}
+                    onLetterClick={row.interactive ? () => {
+                      // This function will be implemented in LetterGrid
+                    } : undefined}
                   />
                 ))}
               </div>
@@ -208,6 +217,13 @@ export function DuelMode() {
         {!isMobile && (
           <div className="mt-4 text-center text-gray-400 text-sm">
             <p>Rakibinizin tahminlerini sadece renk kodları ile görebilirsiniz</p>
+          </div>
+        )}
+
+        {/* Mobile tip for interactive input */}
+        {isMobile && (
+          <div className="mt-2 text-center text-blue-300 text-xs">
+            💡 Harf kutucuklarına tıklayarak yazabilirsiniz!
           </div>
         )}
       </div>
