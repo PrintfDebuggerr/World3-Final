@@ -26,23 +26,38 @@ export function TurkishKeyboard({ onKeyPress, keyboardStatus, disabled = false }
 
   const handleMobileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    const oldValue = mobileInputValue;
     setMobileInputValue(value);
     
-    // Her karakter için onKeyPress çağır
-    if (value.length > mobileInputValue.length) {
+    // Sadece yeni eklenen harfi işle
+    if (value.length > oldValue.length) {
       const newChar = value[value.length - 1].toUpperCase();
       if (/^[A-ZÇĞIİÖŞÜ]$/.test(newChar)) {
-        onKeyPress(newChar);
+        // Harfi manuel olarak ekle, otomatik onKeyPress çağırma
+        // Burada sadece input'u güncelle, oyun mantığını handle etme
       }
+    } else if (value.length < oldValue.length) {
+      // Harf silindi, oyun mantığını handle etme
     }
   };
 
   const handleMobileInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      onKeyPress('ENTER');
-      setMobileInputValue('');
+      // Enter tuşuna basıldığında tüm kelimeyi gönder
+      const word = mobileInputValue.toUpperCase();
+      if (word.length === 5) {
+        // Her harfi tek tek ekle
+        for (let i = 0; i < word.length; i++) {
+          onKeyPress(word[i]);
+        }
+        // Enter tuşunu gönder
+        onKeyPress('ENTER');
+        setMobileInputValue('');
+      }
     } else if (e.key === 'Backspace') {
+      // Backspace tuşuna basıldığında son harfi sil
       onKeyPress('BACKSPACE');
+      setMobileInputValue(mobileInputValue.slice(0, -1));
     }
   };
 
