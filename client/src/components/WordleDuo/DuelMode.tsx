@@ -92,124 +92,110 @@ export function DuelMode() {
   const opponentGrid = createPlayerGrid(opponentGuesses, false);
 
   return (
-    <div className={`flex-1 ${isMobile && orientation === 'landscape' ? 'p-0.5' : 'p-2 sm:p-4'}`}>
-      <div className="max-w-6xl mx-auto h-full flex flex-col">
-        {/* Mode Header - Compact for mobile landscape */}
-        {!(isMobile && orientation === 'landscape') && (
-          <div className="text-center mb-2 sm:mb-4 lg:mb-6">
-            <div className="glass-card rounded-xl sm:rounded-2xl p-2 sm:p-4">
-              <h3 className="text-sm sm:text-lg font-bold text-white mb-1 sm:mb-2">🏆 Düello Modu</h3>
-              {!isMobile && (
-                <p className="text-gray-300 text-xs sm:text-sm">
-                  Farklı kelimelerle yarışın! Kim önce bulursa kazanır.
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 text-white p-4 overflow-y-auto">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold mb-2">Wordle Duo</h1>
+        <p className="text-blue-200">Düello Mod - {gameState.roomData.players.length} Oyuncu</p>
+      </div>
+
+      {/* Game Container - Scrollable */}
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Players Display */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {gameState.roomData.players.map((player: any, index: number) => (
+            <div
+              key={player.id}
+              className={`bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center transition-all ${
+                gameState.roomData!.currentTurn === index
+                  ? 'ring-2 ring-red-500 bg-red-500/20'
+                  : ''
+              }`}
+            >
+              <div className="text-2xl mb-2">{player.avatar}</div>
+              <div className="font-semibold text-lg mb-1">{player.name}</div>
+              <div className="text-sm text-blue-200">
+                {gameState.roomData!.currentTurn === index ? 'Oynuyor...' : 'Bekliyor...'}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Current Input Row */}
+        {gameState.isMyTurn && (
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold mb-2">Tahmininizi Girin</h3>
+              {isMobile && (
+                <p className="text-sm text-blue-200 mb-2">
+                  💡 Harf kutucuklarına tıklayarak yazabilirsiniz!
                 </p>
               )}
             </div>
+            
+            <LetterGrid
+              letters={gameState.currentInput.padEnd(5, '')}
+              statuses={Array(5).fill('empty')}
+              interactive={true}
+              onLetterClick={handleLetterClick}
+            />
+            
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => {
+                  if (gameState.currentInput.length === 5) {
+                    // Submit guess logic will be handled by useWordleDuo
+                    console.log('Submitting guess:', gameState.currentInput);
+                  }
+                }}
+                disabled={gameState.currentInput.length !== 5}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
+              >
+                Tahmin Et
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Dual Grid Layout - Responsive for mobile landscape */}
-        <div className={`grid flex-1 ${
-          isMobile && orientation === 'landscape' 
-            ? 'grid-cols-2 gap-0.5' 
-            : 'grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 lg:gap-8'
-        }`}>
-          {/* My Grid */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className={isMobile ? "space-y-1" : "space-y-4"}
-          >
-            <div className={`glass-card rounded-xl sm:rounded-2xl ${
-              isMobile && orientation === 'landscape' ? 'p-0.5' : isMobile ? 'p-2' : 'p-4'
-            }`}>
-              <div className={`flex items-center justify-center space-x-1 sm:space-x-2 ${
-                isMobile && orientation === 'landscape' ? 'mb-0.5' : isMobile ? 'mb-2' : 'mb-4'
-              }`}>
-                <span className={isMobile ? "text-lg" : "text-2xl"}>{gameState.playerData.avatar}</span>
-                <span className={`text-white font-bold ${isMobile ? 'text-sm truncate max-w-20' : ''}`}>
-                  {isMobile && gameState.playerData.name.length > 8 
-                    ? gameState.playerData.name.slice(0, 8) + '...' 
-                    : gameState.playerData.name}
-                </span>
-                <span className={`text-green-400 ${isMobile ? 'text-sm' : ''}`}>👤</span>
-              </div>
-              
-              <div className={isMobile && orientation === 'landscape' ? "space-y-0.5" : isMobile ? "space-y-1" : "space-y-2"}>
-                {myGrid.map((row, index) => (
-                  <LetterGrid
-                    key={index}
-                    letters={row.letters}
-                    statuses={row.statuses}
-                    animate={row.animate}
-                    enlarged={isMobile && orientation === 'landscape'}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Opponent Grid */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className={isMobile ? "space-y-1" : "space-y-4"}
-          >
-            <div className={`glass-card rounded-xl sm:rounded-2xl ${
-              isMobile && orientation === 'landscape' ? 'p-0.5' : isMobile ? 'p-2' : 'p-4'
-            }`}>
-              <div className={`flex items-center justify-center space-x-1 sm:space-x-2 ${
-                isMobile && orientation === 'landscape' ? 'mb-0.5' : isMobile ? 'mb-2' : 'mb-4'
-              }`}>
-                <span className={isMobile ? "text-lg" : "text-2xl"}>{player2?.avatar || '👤'}</span>
-                <span className={`text-white font-bold ${isMobile ? 'text-sm truncate max-w-20' : ''}`}>
-                  {isMobile && (player2?.name || 'Oyuncu 2').length > 8 
-                    ? (player2?.name || 'Oyuncu 2').slice(0, 8) + '...' 
-                    : player2?.name || 'Oyuncu 2'}
-                </span>
-                <span className={`text-red-400 ${isMobile ? 'text-sm' : ''}`}>🔥</span>
-              </div>
-              
-              <div className={isMobile && orientation === 'landscape' ? "space-y-0.5" : isMobile ? "space-y-1" : "space-y-2"}>
-                {opponentGrid.map((row, index) => (
-                  <LetterGrid
-                    key={index}
-                    letters={row.letters}
-                    statuses={row.statuses}
-                    animate={row.animate}
-                    enlarged={isMobile && orientation === 'landscape'}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
+        {/* Game Grid - Scrollable */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <h3 className="text-lg font-semibold mb-4 text-center">Oyun Geçmişi</h3>
+          <div className="max-h-80 overflow-y-auto space-y-3 pr-2 scroll-smooth">
+            {gridRows.map((row, index) => (
+              <motion.div
+                key={`${row.playerId}-${row.rowIndex}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className="bg-white/5 rounded-lg p-3"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">{row.playerAvatar}</span>
+                    <span className="font-medium">{row.playerName}</span>
+                  </div>
+                  <span className="text-sm text-gray-300">Satır {row.rowIndex + 1}</span>
+                </div>
+                
+                <LetterGrid
+                  letters={Array.isArray(row.guess) ? row.guess : row.guess.split('')}
+                  statuses={row.result}
+                  interactive={false}
+                />
+              </motion.div>
+            ))}
+          </div>
         </div>
 
-        {/* Progress Indicators - Hide on mobile landscape */}
-        {!(isMobile && orientation === 'landscape') && (
-          <div className={`${isMobile ? 'mt-2' : 'mt-6'} grid grid-cols-2 gap-2 sm:gap-4`}>
-          <div className={`glass-card rounded-lg sm:rounded-xl ${isMobile ? 'p-2' : 'p-3'} text-center`}>
-            <div className={`text-gray-300 ${isMobile ? 'text-xs' : 'text-sm'}`}>İlerlemeniz</div>
-            <div className={`font-bold text-white ${isMobile ? 'text-lg' : 'text-2xl'}`}>
-              {myGuesses.length} / 6
-            </div>
-          </div>
-          
-          <div className={`glass-card rounded-lg sm:rounded-xl ${isMobile ? 'p-2' : 'p-3'} text-center`}>
-            <div className={`text-gray-300 ${isMobile ? 'text-xs' : 'text-sm'}`}>Rakip İlerlemesi</div>
-            <div className={`font-bold text-white ${isMobile ? 'text-lg' : 'text-2xl'}`}>
-              {opponentGuesses.length} / 6
-            </div>
-          </div>
-          </div>
-        )}
-
-        {/* Instructions - Hide on mobile landscape */}
-        {!isMobile && (
-          <div className="mt-4 text-center text-gray-400 text-sm">
-            <p>Rakibinizin tahminlerini sadece renk kodları ile görebilirsiniz</p>
-          </div>
-        )}
+        {/* Game Status */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+          <p className="text-lg">
+            {gameState.roomData.status === 'playing' 
+              ? `Oyun devam ediyor - ${gameState.roomData.players.length} oyuncu aktif`
+              : 'Oyun tamamlandı!'
+            }
+          </p>
+        </div>
       </div>
     </div>
   );

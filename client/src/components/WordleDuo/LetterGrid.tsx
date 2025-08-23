@@ -48,11 +48,6 @@ export function LetterGrid({
     
     // Mobilde kendi klavyesi açılsın ve sürekli açık kalsın
     if (isMobile) {
-      // Mevcut scroll pozisyonunu kaydet
-      const currentScrollTop = window.scrollY;
-      const scrollContainer = document.querySelector('.scroll-container');
-      const containerScrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
-      
       // Input field oluştur ve focus et
       const input = document.createElement('input');
       input.type = 'text';
@@ -100,20 +95,6 @@ export function LetterGrid({
         if (document.body.contains(input)) {
           input.style.display = 'none';
         }
-      };
-      
-      // Focus olduktan sonra scroll pozisyonunu geri yükle
-      input.onfocus = () => {
-        // Kısa bir gecikme ile scroll pozisyonunu geri yükle
-        setTimeout(() => {
-          // Sayfa scroll pozisyonunu geri yükle
-          window.scrollTo(0, currentScrollTop);
-          
-          // Container scroll pozisyonunu geri yükle
-          if (scrollContainer) {
-            scrollContainer.scrollTop = containerScrollTop;
-          }
-        }, 50);
       };
       
       document.body.appendChild(input);

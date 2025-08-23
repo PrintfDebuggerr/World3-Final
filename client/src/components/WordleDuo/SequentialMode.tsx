@@ -23,126 +23,112 @@ export function SequentialMode() {
     playerId: entry.playerId,
     playerName: gameState.roomData!.players.find((p: any) => p.id === entry.playerId)?.name || 'Unknown',
     playerAvatar: gameState.roomData!.players.find((p: any) => p.id === entry.playerId)?.avatar || '👤',
-    guess: entry.guess,
+    guess: Array.isArray(entry.guess) ? entry.guess : entry.guess.split(''),
     result: entry.result,
     rowIndex: entry.rowIndex
   }));
 
   return (
-    <div className="h-full flex flex-col">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex-1 flex flex-col space-y-4 p-4"
-      >
-        {/* Turn Indicator */}
-        <div className="flex-shrink-0">
-          <div className="text-center mb-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Sıra Kimde?</h2>
-            <div className="flex justify-center space-x-2 sm:space-x-4">
-              {gameState.roomData.players.map((player: any, index: number) => (
-                <div
-                  key={player.id}
-                  className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 sm:py-2 rounded-lg transition-all ${
-                    gameState.roomData!.currentTurn === index
-                      ? 'bg-red-500/30 ring-2 ring-red-500'
-                      : 'bg-white/10'
-                  }`}
-                >
-                  <span className="text-lg sm:text-2xl">{player.avatar}</span>
-                  <span className="text-white font-medium text-xs sm:text-base truncate max-w-16 sm:max-w-none">{player.name}</span>
-                  {gameState.roomData!.currentTurn === index && (
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  )}
-                </div>
-              ))}
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 text-white p-4 overflow-y-auto">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold mb-2">Wordle Duo</h1>
+        <p className="text-blue-200">Sıralı Mod - {gameState.roomData.players.length} Oyuncu</p>
+      </div>
+
+      {/* Game Container - Scrollable */}
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Current Turn Display */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+          <h2 className="text-xl font-semibold mb-2">
+            {gameState.roomData.players[gameState.roomData.currentTurn]?.name || 'Bilinmeyen Oyuncu'}'ın Sırası
+          </h2>
+          <div className="flex justify-center items-center space-x-2">
+            <span className="text-2xl">
+              {gameState.roomData.players[gameState.roomData.currentTurn]?.avatar || '👤'}
+            </span>
+            <span className="text-lg text-blue-200">
+              {gameState.roomData.players[gameState.roomData.currentTurn]?.name || 'Bilinmeyen Oyuncu'}
+            </span>
+          </div>
+        </div>
+
+        {/* Current Input Row */}
+        {gameState.isMyTurn && (
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold mb-2">Tahmininizi Girin</h3>
+              {isMobile && (
+                <p className="text-sm text-blue-200 mb-2">
+                  💡 Harf kutucuklarına tıklayarak yazabilirsiniz!
+                </p>
+              )}
+            </div>
+            
+            <LetterGrid
+              letters={gameState.currentInput.padEnd(5, '')}
+              statuses={Array(5).fill('empty')}
+              interactive={true}
+              onLetterClick={handleLetterClick}
+            />
+            
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => {
+                  if (gameState.currentInput.length === 5) {
+                    // Submit guess logic will be handled by useWordleDuo
+                    console.log('Submitting guess:', gameState.currentInput);
+                  }
+                }}
+                disabled={gameState.currentInput.length !== 5}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
+              >
+                Tahmin Et
+              </button>
             </div>
           </div>
-
-          {!gameState.isMyTurn && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-gray-300 text-sm sm:text-base"
-            >
-              {gameState.roomData.players[gameState.roomData.currentTurn]?.name} oynuyor...
-            </motion.div>
-          )}
-        </div>
+        )}
 
         {/* Game Grid - Scrollable */}
-        <div className="flex-1 min-h-0" style={{ maxHeight: '320px' }}>
-          <div 
-            ref={scrollContainerRef}
-            className="h-full overflow-y-auto space-y-1 sm:space-y-2 pr-1 sm:pr-2 scroll-smooth"
-          >
-          {gridRows.map((row, index) => (
-            <motion.div
-              key={`${row.playerId}-${row.rowIndex}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-center space-x-2 sm:space-x-4 py-0.5 sm:py-1 min-h-12 sm:min-h-16"
-            >
-              {/* Player Avatar - Responsive */}
-              <div className="flex items-center space-x-1 sm:space-x-2 w-20 sm:w-32 md:w-36 max-w-20 sm:max-w-32 md:max-w-36 flex-shrink-0">
-                <span className="text-lg sm:text-xl md:text-2xl flex-shrink-0">{row.playerAvatar}</span>
-                <span className="text-sm sm:text-base md:text-lg text-gray-300 truncate min-w-0 overflow-hidden">
-                  {row.playerName.length > 8 ? row.playerName.slice(0, 8) + '...' : row.playerName}
-                </span>
-              </div>
-
-              {/* Letter Row */}
-              <div className="flex-1">
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <h3 className="text-lg font-semibold mb-4 text-center">Oyun Geçmişi</h3>
+          <div className="max-h-80 overflow-y-auto space-y-3 pr-2 scroll-smooth">
+            {gridRows.map((row, index) => (
+              <motion.div
+                key={`${row.playerId}-${row.rowIndex}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className="bg-white/5 rounded-lg p-3"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">{row.playerAvatar}</span>
+                    <span className="font-medium">{row.playerName}</span>
+                  </div>
+                  <span className="text-sm text-gray-300">Satır {row.rowIndex + 1}</span>
+                </div>
+                
                 <LetterGrid
-                  letters={row.guess.split('')}
+                  letters={row.guess}
                   statuses={row.result}
-                  animate={row.result.some((r: any) => r !== 'empty')}
+                  interactive={false}
                 />
-              </div>
-            </motion.div>
-          ))}
-
-          {/* Current turn row - Always show when it's user's turn */}
-          {gameState.isMyTurn && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center space-x-2 sm:space-x-4 py-0.5 sm:py-1 min-h-12 sm:min-h-16"
-            >
-              <div className="flex items-center space-x-1 sm:space-x-2 w-20 sm:w-32 md:w-36 max-w-20 sm:max-w-32 md:max-w-36 flex-shrink-0">
-                <span className="text-lg sm:text-xl md:text-2xl flex-shrink-0">{gameState.playerData?.avatar}</span>
-                <span className="text-sm sm:text-base md:text-lg text-gray-300 truncate min-w-0 overflow-hidden">
-                  {(gameState.playerData?.name || '').length > 8 ? (gameState.playerData?.name || '').slice(0, 8) + '...' : gameState.playerData?.name}
-                </span>
-              </div>
-              <div className="flex-1">
-                <LetterGrid
-                  letters={gameState.currentInput ? 
-                    [...gameState.currentInput.split(''), ...Array(5 - gameState.currentInput.length).fill('')] : 
-                    ['', '', '', '', '']
-                  }
-                  statuses={Array(5).fill('empty')}
-                  animate={false}
-                  interactive={true} // Tıklanabilir yap
-                  onLetterClick={handleLetterClick} // Harf tıklama callback'i
-                />
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            ))}
           </div>
         </div>
 
-        {/* Instructions - Fixed */}
-        <div className="flex-shrink-0 mt-3 sm:mt-6 text-center text-gray-400 text-xs sm:text-sm">
-          <p>Her oyuncu sırayla 5 harfli Türkçe kelime tahmin eder</p>
-          {isMobile && gameState.isMyTurn && (
-            <p className="mt-2 text-blue-400">
-              💡 Harf kutucuklarına tıklayarak yazabilirsiniz!
-            </p>
-          )}
+        {/* Game Status */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+          <p className="text-lg">
+            {gameState.roomData.status === 'playing' 
+              ? `Oyun devam ediyor - ${gameState.roomData.players.length} oyuncu aktif`
+              : 'Oyun tamamlandı!'
+            }
+          </p>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
