@@ -323,9 +323,28 @@ export function useWordleDuo() {
       if (!isMyTurn) return;
     }
 
+    // For duel mode, always allow input
+    if (gameState.roomData.mode === 'duel') {
+      // Check if game is still active
+      if (gameState.roomData.status !== 'playing') return;
+      
+      // Check if player has already won or lost
+      const myGuesses = gameState.roomData.gameHistory.filter(
+        (h: any) => h.playerId === gameState.playerData.id
+      );
+      if (myGuesses.length >= 6) return; // Max 6 guesses
+      
+      // Check if player already found the word
+      const hasWon = myGuesses.some((g: any) => g.result.every((r: string) => r === 'correct'));
+      if (hasWon) return;
+    }
+
     // Bu fonksiyon mobil input'tan gelecek
     // Şimdilik sadece console'a yazdıralım
     console.log(`Letter clicked at position: ${index}`);
+    
+    // TODO: Burada gerçek harf ekleme mantığı olacak
+    // Şimdilik sadece test için
   }, [gameState]);
 
   // Define startNewGameFromRequest before it's used

@@ -68,11 +68,19 @@ export function DuelMode() {
           animate: true,
           interactive: false
         });
-      } else if (i === guesses.length && showLetters && gameState.currentInput && isCurrentPlayer) {
-        // Current input row - make it interactive
-        const letters = gameState.currentInput.padEnd(5, ' ').split('');
+      } else if (i === guesses.length && showLetters && isCurrentPlayer) {
+        // Current input row - make it interactive (even if currentInput is empty)
+        const letters = gameState.currentInput ? gameState.currentInput.padEnd(5, ' ').split('') : ['', '', '', '', ''];
         rows.push({
           letters,
+          statuses: Array(5).fill('empty'),
+          animate: false,
+          interactive: true
+        });
+      } else if (i === guesses.length && showLetters && isCurrentPlayer && !gameState.currentInput) {
+        // Empty input row for current player - make it interactive
+        rows.push({
+          letters: ['', '', '', '', ''],
           statuses: Array(5).fill('empty'),
           animate: false,
           interactive: true
