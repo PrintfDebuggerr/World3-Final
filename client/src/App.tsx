@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from './components/WordleDuo/ErrorBoundary';
 import { MainMenu } from './components/WordleDuo/MainMenu';
 import { GameBoard } from './components/WordleDuo/GameBoard';
+import { MobileProvider } from './contexts/MobileContext';
+import { MobileLayoutWrapper } from './components/mobile/MobileLayoutWrapper';
 import { motion } from 'framer-motion';
 import './styles/animations.css';
 
@@ -47,15 +49,19 @@ function AppLayout() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <Suspense fallback={
-          <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-            <div className="text-white text-xl">Yükleniyor...</div>
-          </div>
-        }>
-          <AppLayout />
-        </Suspense>
-      </ErrorBoundary>
+      <MobileProvider>
+        <ErrorBoundary>
+          <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+              <div className="text-white text-xl">Yükleniyor...</div>
+            </div>
+          }>
+            <MobileLayoutWrapper>
+              <AppLayout />
+            </MobileLayoutWrapper>
+          </Suspense>
+        </ErrorBoundary>
+      </MobileProvider>
     </QueryClientProvider>
   );
 }

@@ -266,3 +266,180 @@
     box-shadow: 0 0 40px rgba(236, 72, 153, 0.8), 0 0 60px rgba(236, 72, 153, 0.4);
   }
 }
+
+/* Mobile-optimized animation classes */
+@keyframes mobile-fade-in-fast {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mobile-slide-up-fast {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobile-scale-fast {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes mobile-bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes mobile-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes mobile-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Touch feedback animations */
+@keyframes touch-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes touch-press {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Mobile-optimized utility classes */
+.mobile-fade-in-fast {
+  animation: mobile-fade-in-fast 150ms ease-out;
+}
+
+.mobile-slide-up-fast {
+  animation: mobile-slide-up-fast 200ms ease-out;
+}
+
+.mobile-scale-fast {
+  animation: mobile-scale-fast 150ms ease-out;
+}
+
+.mobile-bounce-in {
+  animation: mobile-bounce-in 300ms ease-out;
+}
+
+.mobile-slide-in-right {
+  animation: mobile-slide-in-right 250ms ease-out;
+}
+
+.mobile-slide-in-left {
+  animation: mobile-slide-in-left 250ms ease-out;
+}
+
+.touch-ripple {
+  animation: touch-ripple 300ms ease-out;
+}
+
+.touch-press {
+  animation: touch-press 100ms ease-out;
+}
+
+/* Performance-optimized animations for mobile */
+@media (max-width: 767px) {
+  /* Reduce animation complexity on mobile for better performance */
+  .flip-animation {
+    animation-duration: 0.4s;
+  }
+  
+  .bounce-in {
+    animation-duration: 0.4s;
+  }
+  
+  .slide-up {
+    animation-duration: 0.2s;
+  }
+  
+  /* Hardware acceleration for mobile animations */
+  .mobile-fade-in-fast,
+  .mobile-slide-up-fast,
+  .mobile-scale-fast,
+  .mobile-bounce-in,
+  .mobile-slide-in-right,
+  .mobile-slide-in-left,
+  .touch-ripple,
+  .touch-press {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+}
+
+/* Reduced motion support for mobile animations */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-fade-in-fast,
+  .mobile-slide-up-fast,
+  .mobile-scale-fast,
+  .mobile-bounce-in,
+  .mobile-slide-in-right,
+  .mobile-slide-in-left,
+  .touch-ripple,
+  .touch-press {
+    animation: none;
+  }
+  
+  /* Provide instant feedback without animation */
+  .touch-press {
+    transform: scale(0.98);
+    transition: transform 0.05s ease-out;
+  }
+}
