@@ -118,7 +118,7 @@ export function DuelMode() {
   });
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden duel-mode-container">
       <div className={`mx-auto h-full flex flex-col w-full ${
         isMobile 
           ? 'max-w-none' // No max width restriction on mobile
@@ -128,24 +128,24 @@ export function DuelMode() {
         <div className={`flex-shrink-0 text-center ${
           isMobile 
             ? 'mb-1 p-1' // Compact header for mobile
-            : 'mb-4 p-4' // Standard header for desktop
+            : 'mb-2 p-2' // Compact header for desktop too
         }`}>
           <div className={`glass-card rounded-2xl ${
             isMobile 
               ? 'p-2' // Compact padding for mobile
-              : 'p-4' // Standard padding for desktop
+              : 'p-2' // Compact padding for desktop
           }`}>
             <h3 className={`font-bold text-white ${
               isMobile 
                 ? 'text-sm mb-1' // Smaller title for mobile
-                : 'text-lg mb-2' // Standard title for desktop
+                : 'text-base mb-1' // Smaller title for desktop
             }`}>
               🏆 Düello Modu
             </h3>
             <p className={`text-gray-300 ${
               isMobile 
                 ? 'text-xs' // Smaller description for mobile
-                : 'text-sm' // Standard description for desktop
+                : 'text-xs' // Smaller description for desktop
             }`}>
               Farklı kelimelerle yarışın! Kim önce bulursa kazanır.
             </p>
@@ -153,13 +153,13 @@ export function DuelMode() {
         </div>
 
         {/* Grid Container - Mobile-optimized responsive layout */}
-        <div className={`flex-1 min-h-0 overflow-hidden ${
+        <div className={`flex-1 min-h-0 overflow-hidden duel-grid-container ${
           isMobile 
             ? 'px-1' // Very tight padding for mobile to prevent overflow
             : 'px-4' // Desktop: standard padding
         }`}>
           {/* Responsive Dual Grid Layout - Equal width columns */}
-          <div className={`flex h-full overflow-hidden ${
+          <div className={`flex h-full overflow-hidden duel-grid-wrapper ${
             // Mobile: Minimal spacing to prevent overflow
             isMobile 
               ? 'gap-0.5' // Minimal gap for mobile
@@ -180,39 +180,39 @@ export function DuelMode() {
                   : 'p-4' // Standard padding for desktop
               }`}>
                 {/* Player Header - Responsive sizing */}
-                <div className={`flex items-center justify-center space-x-1 ${
+                <div className={`flex items-center justify-center space-x-1 flex-shrink-0 ${
                   isMobile 
                     ? 'mb-1' // Minimal margin for mobile to save space
-                    : 'mb-4' // Standard margin for desktop
+                    : 'mb-2' // Minimal margin for desktop
                 }`}>
                   <span className={`${
                     isMobile 
                       ? 'text-sm' // Smaller avatar for mobile
-                      : 'text-2xl' // Standard size for desktop
+                      : 'text-lg' // Smaller size for desktop
                   }`}>
                     {gameState.playerData.avatar}
                   </span>
                   <span className={`text-white font-bold ${
                     isMobile 
                       ? 'text-xs' // Smaller text for mobile
-                      : 'text-lg' // Standard size for desktop
+                      : 'text-sm' // Smaller size for desktop
                   }`}>
                     {gameState.playerData.name}
                   </span>
                   <span className={`text-green-400 ${
                     isMobile 
                       ? 'text-xs' // Smaller icon for mobile
-                      : 'text-lg' // Standard size for desktop
+                      : 'text-sm' // Smaller size for desktop
                   }`}>
                     👤
                   </span>
                 </div>
                 
                 {/* Letter Grid with responsive spacing */}
-                <div className={`flex-1 flex flex-col justify-center ${
+                <div className={`flex-1 flex flex-col justify-center player-grid ${
                   isMobile 
                     ? 'space-y-1' // Tight spacing for mobile to fit both players
-                    : 'space-y-2' // Standard spacing for desktop
+                    : 'space-y-2' // Balanced spacing for desktop to fit 6 rows
                 }`}>
                   {myGrid.map((row, index) => (
                     <LetterGrid
@@ -245,39 +245,39 @@ export function DuelMode() {
                   : 'p-4' // Standard padding for desktop
               }`}>
                 {/* Opponent Header - Responsive sizing */}
-                <div className={`flex items-center justify-center space-x-1 ${
+                <div className={`flex items-center justify-center space-x-1 flex-shrink-0 ${
                   isMobile 
                     ? 'mb-1' // Minimal margin for mobile to save space
-                    : 'mb-4' // Standard margin for desktop
+                    : 'mb-2' // Minimal margin for desktop
                 }`}>
                   <span className={`${
                     isMobile 
                       ? 'text-sm' // Smaller avatar for mobile
-                      : 'text-2xl' // Standard size for desktop
+                      : 'text-lg' // Smaller size for desktop
                   }`}>
                     {player2?.avatar || '👤'}
                   </span>
                   <span className={`text-white font-bold ${
                     isMobile 
                       ? 'text-xs' // Smaller text for mobile
-                      : 'text-lg' // Standard size for desktop
+                      : 'text-sm' // Smaller size for desktop
                   }`}>
                     {player2?.name || 'Oyuncu 2'}
                   </span>
                   <span className={`text-red-400 ${
                     isMobile 
                       ? 'text-xs' // Smaller icon for mobile
-                      : 'text-lg' // Standard size for desktop
+                      : 'text-sm' // Smaller size for desktop
                   }`}>
                     🔥
                   </span>
                 </div>
                 
                 {/* Compact Opponent Grid with Color-Only Feedback */}
-                <div className={`flex-1 flex flex-col justify-center ${
+                <div className={`flex-1 flex flex-col justify-center opponent-grid ${
                   isMobile 
                     ? 'space-y-1' // Tight spacing for mobile to fit both players
-                    : 'space-y-2' // Standard spacing for desktop
+                    : 'space-y-2' // Balanced spacing for desktop to fit 6 rows
                 }`}>
                   {opponentGrid.map((row, index) => (
                     <motion.div
@@ -289,6 +289,7 @@ export function DuelMode() {
                         ease: "easeOut",
                         delay: row.isNewGuess ? 0.1 : 0 
                       }}
+                      className="opponent-row"
                     >
                       <LetterGrid
                         letters={row.letters}
@@ -302,28 +303,6 @@ export function DuelMode() {
                     </motion.div>
                   ))}
                 </div>
-                
-                {/* Mobile-specific opponent status indicator */}
-                {isMobile && (
-                  <div className="mt-1 text-center">
-                    <div className={`inline-flex items-center space-x-1 px-1 py-0.5 rounded-full ${
-                      opponentGuesses.length > myGuesses.length 
-                        ? 'bg-red-500/20 text-red-300' 
-                        : opponentGuesses.length === myGuesses.length
-                          ? 'bg-yellow-500/20 text-yellow-300'
-                          : 'bg-green-500/20 text-green-300'
-                    }`}>
-                      <span className="text-xs">
-                        {opponentGuesses.length > myGuesses.length 
-                          ? '🏃‍♂️' 
-                          : opponentGuesses.length === myGuesses.length
-                            ? '🤝'
-                            : '🐌'
-                        }
-                      </span>
-                    </div>
-                  </div>
-                )}
               </div>
             </motion.div>
           </div>
@@ -333,19 +312,19 @@ export function DuelMode() {
         <div className={`flex-shrink-0 ${
           isMobile 
             ? 'mt-1 px-1' // Minimal spacing for mobile
-            : 'mt-2 px-4' // Standard spacing for desktop
+            : 'mt-1 px-4' // Minimal spacing for desktop
         }`}>
           <div className={`grid grid-cols-2 ${
             isMobile 
               ? 'gap-1' // Tighter gap for mobile
-              : 'gap-4' // Standard gap for desktop
+              : 'gap-2' // Tighter gap for desktop
           }`}>
             {/* My Progress - Enhanced with visual progress bar */}
             <motion.div 
               className={`glass-card rounded-lg text-center ${
                 isMobile 
                   ? 'p-1' // Very compact padding for mobile
-                  : 'p-3' // Standard padding for desktop
+                  : 'p-2' // Compact padding for desktop
               }`}
               whileHover={shouldAnimate ? { scale: 1.02 } : {}}
               transition={getOptimizedTransition({ duration: 0.2 })}
@@ -386,7 +365,7 @@ export function DuelMode() {
               className={`glass-card rounded-lg text-center ${
                 isMobile 
                   ? 'p-1' // Very compact padding for mobile
-                  : 'p-3' // Standard padding for desktop
+                  : 'p-2' // Compact padding for desktop
               }`}
               whileHover={shouldAnimate ? { scale: 1.02 } : {}}
               transition={getOptimizedTransition({ duration: 0.2 })}
@@ -428,7 +407,7 @@ export function DuelMode() {
         <div className={`flex-shrink-0 text-center text-gray-400 ${
           isMobile 
             ? 'px-1 py-1 text-xs' // Minimal padding for mobile
-            : 'px-4 py-2 text-sm' // Standard for desktop
+            : 'px-4 py-1 text-xs' // Minimal for desktop
         }`}>
           <p>
             {isMobile 
@@ -477,7 +456,7 @@ export function DuelMode() {
         <div className={`flex-shrink-0 ${
           isMobile 
             ? 'px-1 pb-1' // Minimal padding for mobile
-            : 'px-4 pb-4' // Standard padding for desktop
+            : 'px-4 pb-2' // Minimal padding for desktop
         }`}>
           <TurkishKeyboard 
             onKeyPress={handleKeyPress}

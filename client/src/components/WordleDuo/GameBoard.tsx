@@ -13,6 +13,7 @@ export function GameBoard() {
   const { orientation, isMobile } = useOrientation();
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [isOrientationChanging, setIsOrientationChanging] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [screenSize, setScreenSize] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 0,
     height: typeof window !== 'undefined' ? window.innerHeight : 0
@@ -219,10 +220,28 @@ export function GameBoard() {
               </p>
               <div className="glass-card p-4 sm:p-6 rounded-2xl">
                 <p className="text-xs sm:text-sm text-gray-300 mb-2">Oda Kodu:</p>
-                <p className="text-2xl sm:text-3xl font-mono font-bold text-white tracking-widest break-all">
+                <p className="text-2xl sm:text-3xl font-mono font-bold text-white tracking-widest break-all mb-4">
                   {gameState.roomCode}
                 </p>
-                <p className="text-xs text-gray-400 mt-2">
+                
+                {/* Copy Button */}
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(gameState.roomCode || '');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className={`w-full font-semibold py-3 px-4 rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center space-x-2 ${
+                    copied 
+                      ? 'bg-green-500 hover:bg-green-600' 
+                      : 'bg-blue-500 hover:bg-blue-600'
+                  } text-white`}
+                >
+                  <span>{copied ? '✅' : '📋'}</span>
+                  <span>{copied ? 'Kopyalandı!' : 'Kodu Kopyala'}</span>
+                </button>
+                
+                <p className="text-xs text-gray-400 mt-3">
                   Bu kodu arkadaşınızla paylaşın
                 </p>
               </div>
