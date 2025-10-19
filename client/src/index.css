@@ -165,11 +165,7 @@
     width: 100vw;
     min-height: 100vh;
     min-height: 100dvh; /* Dynamic viewport height for mobile */
-    /* Support for safe areas on mobile devices */
-    padding-top: var(--safe-area-top);
-    padding-bottom: var(--safe-area-bottom);
-    padding-left: var(--safe-area-left);
-    padding-right: var(--safe-area-right);
+    /* Support for safe areas on mobile devices - no padding on body */
     /* Optimize touch interactions */
     touch-action: manipulation;
     /* Prevent text selection on mobile */

@@ -75,9 +75,13 @@ export function WinScreen() {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      className="flex-1 flex items-center justify-center p-4"
+      className="flex-1 flex items-center justify-center p-4 overflow-y-auto"
+      style={{
+        minHeight: '100%',
+        paddingBottom: 'env(safe-area-inset-bottom, 20px)'
+      }}
     >
-      <div className="text-center max-w-md">
+      <div className="text-center max-w-md w-full my-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -131,6 +135,7 @@ export function WinScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
           className="space-y-4 relative z-20"
+          style={{ paddingBottom: '20px' }}
         >
           {/* Yeni Oyun İsteği Durumu */}
           <div className="glass-card rounded-2xl p-4 mb-4">

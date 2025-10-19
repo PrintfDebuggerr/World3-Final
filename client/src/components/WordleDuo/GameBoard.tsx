@@ -271,7 +271,11 @@ export function GameBoard() {
           </div>
         )}
 
-        {gameState.phase === 'finished' && <WinScreen />}
+        {gameState.phase === 'finished' && (
+          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
+            <WinScreen />
+          </div>
+        )}
       </div>
 
       {/* Error Display - Mobile Optimized */}
