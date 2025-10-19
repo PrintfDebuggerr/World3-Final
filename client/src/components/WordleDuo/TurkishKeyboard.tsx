@@ -81,11 +81,11 @@ export function TurkishKeyboard({
     if (deviceCategory === 'mobile') {
       // More aggressive margins for smaller screens
       if (screenWidth <= 375) { // iPhone SE, iPhone 12 mini
-        safeMargin = 16;
+        safeMargin = 8;
       } else if (screenWidth <= 414) { // iPhone XR, iPhone 11
-        safeMargin = 20;
+        safeMargin = 12;
       } else { // iPhone 14 Pro Max, etc.
-        safeMargin = 24;
+        safeMargin = 16;
       }
     } else {
       safeMargin = 48;
@@ -96,11 +96,11 @@ export function TurkishKeyboard({
     let keySpacing: number;
     if (deviceCategory === 'mobile') {
       if (screenWidth <= 375) { // Small screens
-        keySpacing = 2;
+        keySpacing = 1.5;
       } else if (screenWidth <= 414) { // Medium screens
-        keySpacing = 3;
+        keySpacing = 2;
       } else { // Large screens
-        keySpacing = 4;
+        keySpacing = 2.5;
       }
     } else {
       keySpacing = 6;
@@ -111,24 +111,24 @@ export function TurkishKeyboard({
     let keyWidth = (availableWidth - totalSpacing) / maxKeysInRow;
     
     // Apply constraints based on device
-    const minKeyWidth = deviceCategory === 'mobile' ? 24 : MOBILE_CONFIG.touchTarget.minimum;
-    const maxKeyWidth = deviceCategory === 'mobile' ? 40 : 60;
+    const minKeyWidth = deviceCategory === 'mobile' ? 20 : MOBILE_CONFIG.touchTarget.minimum;
+    const maxKeyWidth = deviceCategory === 'mobile' ? 36 : 60;
     
     keyWidth = Math.max(minKeyWidth, Math.min(keyWidth, maxKeyWidth));
     
-    // Calculate key height with responsive sizing (increased for better touch)
+    // Calculate key height with responsive sizing (optimized for better touch)
     let keyHeight: number;
     if (deviceCategory === 'mobile') {
-      // Base height on screen size and orientation (increased)
-      const baseHeight = isPortrait ? keyWidth * 1.4 : keyWidth * 1.1;
+      // Base height on screen size and orientation
+      const baseHeight = isPortrait ? keyWidth * 1.3 : keyWidth * 1.0;
       
-      // Apply screen size specific adjustments (increased)
+      // Apply screen size specific adjustments
       if (screenWidth <= 375) { // Small screens
-        keyHeight = Math.max(baseHeight * 1.0, 40);
+        keyHeight = Math.max(baseHeight * 0.95, 36);
       } else if (screenWidth <= 414) { // Medium screens
-        keyHeight = Math.max(baseHeight * 1.1, 44);
+        keyHeight = Math.max(baseHeight * 1.0, 40);
       } else { // Large screens
-        keyHeight = Math.max(baseHeight * 1.2, 48);
+        keyHeight = Math.max(baseHeight * 1.05, 44);
       }
     } else {
       keyHeight = Math.max(keyWidth * 1.1, MOBILE_CONFIG.touchTarget.comfortable);
@@ -138,18 +138,20 @@ export function TurkishKeyboard({
     let fontSize: number;
     if (deviceCategory === 'mobile') {
       if (screenWidth <= 375) { // Small screens
-        fontSize = Math.max(keyWidth * 0.3, 10);
+        fontSize = Math.max(keyWidth * 0.35, 9);
       } else if (screenWidth <= 414) { // Medium screens
-        fontSize = Math.max(keyWidth * 0.32, 11);
+        fontSize = Math.max(keyWidth * 0.38, 10);
       } else { // Large screens
-        fontSize = Math.max(keyWidth * 0.35, 12);
+        fontSize = Math.max(keyWidth * 0.4, 11);
       }
     } else {
       fontSize = Math.max(keyWidth * 0.35, 14);
     }
     
-    // Calculate container padding
-    const containerPadding = mobileUtils.getSpacing(deviceCategory === 'mobile' ? 'md' : 'lg');
+    // Calculate container padding (reduced for mobile)
+    const containerPadding = deviceCategory === 'mobile' 
+      ? (screenWidth <= 375 ? 4 : 6)
+      : mobileUtils.getSpacing('lg');
     
     return {
       keyWidth: Math.floor(keyWidth),
@@ -382,7 +384,7 @@ export function TurkishKeyboard({
 
   const containerStyle = {
     padding: `${dimensions.containerPadding}px`,
-    gap: `${Math.max(dimensions.keySpacing * 1.5, 8)}px`, // Increased vertical spacing between rows
+    gap: `${Math.max(dimensions.keySpacing * 1.2, isMobile ? 4 : 8)}px`, // Reduced vertical spacing for mobile
   };
 
   const rowStyle = {

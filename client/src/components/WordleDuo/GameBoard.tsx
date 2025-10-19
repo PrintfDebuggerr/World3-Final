@@ -89,9 +89,9 @@ export function GameBoard() {
   }
 
   return (
-    <div className={`h-screen flex flex-col transition-all duration-300 ${
+    <div className={`min-h-screen h-screen flex flex-col transition-all duration-300 ${
       isOrientationChanging ? 'opacity-90' : 'opacity-100'
-    } ${isMobile ? 'mobile:h-[100dvh]' : ''}`}>
+    } ${isMobile ? 'h-[100dvh]' : ''}`}>
       {/* Exit Confirmation Modal */}
       <AnimatePresence>
         {showExitConfirm && (
@@ -137,7 +137,7 @@ export function GameBoard() {
       </AnimatePresence>
 
       {/* Header - Mobile Responsive */}
-      <div className="p-2 sm:p-4 border-b border-white/10">
+      <div className="flex-shrink-0 p-2 sm:p-4 border-b border-white/10">
         <div className="max-w-6xl mx-auto">
           {/* Mobile Header Layout */}
           <div className="flex items-center justify-between md:hidden">
@@ -204,7 +204,7 @@ export function GameBoard() {
       </AnimatePresence>
 
       {/* Game Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {gameState.phase === 'waiting' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -231,12 +231,12 @@ export function GameBoard() {
         )}
 
         {gameState.phase === 'playing' && (
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-h-0">
             {/* Sequential Mode - Special Layout with Fixed Keyboard */}
             {gameState.roomData.mode === 'sequential' ? (
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col min-h-0">
                 {/* Scrollable Game History */}
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-y-auto min-h-0">
                   <SequentialMode />
                 </div>
                 
@@ -244,7 +244,7 @@ export function GameBoard() {
                 {gameState.isMyTurn && (
                   <div className={`flex-shrink-0 border-t border-white/10 bg-gray-900/95 backdrop-blur-sm ${
                     isMobile 
-                      ? 'p-2' 
+                      ? 'p-1' 
                       : 'p-4'
                   }`}>
                     <div className={`${
@@ -264,14 +264,8 @@ export function GameBoard() {
               </div>
             ) : (
               /* Duel Mode - Original Layout */
-              <div className="flex-1 overflow-y-auto">
-                <div className={`${
-                  isMobile 
-                    ? 'px-2 py-1 max-w-full' 
-                    : 'px-4 py-2 max-w-6xl mx-auto'
-                }`}>
-                  <DuelMode />
-                </div>
+              <div className="flex-1 flex flex-col min-h-0">
+                <DuelMode />
               </div>
             )}
           </div>

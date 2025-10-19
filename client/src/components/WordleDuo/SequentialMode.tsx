@@ -118,11 +118,11 @@ export function SequentialMode() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col min-h-0">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex-1 flex flex-col overflow-hidden"
+        className="flex-1 flex flex-col min-h-0 overflow-hidden"
         style={{ 
           padding: isMobile ? `${compactSpacing}px` : `${spacing}px`,
           gap: isMobile ? `${compactSpacing}px` : `${spacing}px`
