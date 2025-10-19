@@ -402,8 +402,8 @@ export function TurkishKeyboard({
           exit="exit"
           style={containerStyle}
           className={`
-            keyboard-container touch-optimized flex flex-col
-            ${disabled ? 'opacity-50 pointer-events-none' : ''}
+            keyboard-container touch-optimized flex flex-col relative
+            ${disabled ? 'pointer-events-none' : ''}
             ${isMobile ? 'mobile-keyboard' : 'desktop-keyboard'}
             ${virtualKeyboardOpen ? 'virtual-keyboard-open' : ''}
           `}
@@ -514,10 +514,14 @@ export function TurkishKeyboard({
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center text-gray-400 mt-4 keyboard-disabled-message"
-              style={{ fontSize: `${Math.max(dimensions.fontSize - 2, 12)}px` }}
+              className="absolute inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm rounded-lg z-20"
             >
-              Sıranızı bekleyin...
+              <div className="text-center">
+                <div className="text-3xl mb-2">⏳</div>
+                <div className="text-gray-300 font-semibold" style={{ fontSize: `${Math.max(dimensions.fontSize, 14)}px` }}>
+                  Sıranızı bekleyin...
+                </div>
+              </div>
             </motion.div>
           )}
           

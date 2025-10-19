@@ -285,7 +285,21 @@ export function LetterGrid({
             {letter === ' ' ? '' : letter}
           </motion.span>
           
-          {/* Focus indicator for mobile - no box-shadow to prevent size issues */}
+          {/* Active cursor indicator - shows where next letter will appear */}
+          {interactive && !letter && index === letters.findIndex(l => !l || l === ' ' || l === '') && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{ 
+                duration: 1.2, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+              className="absolute inset-0 border-2 border-blue-400 rounded-md pointer-events-none"
+            />
+          )}
+          
+          {/* Focus indicator for mobile */}
           {interactive && focusedIndex === index && isMobile && (
             <motion.div
               initial={{ opacity: 0 }}

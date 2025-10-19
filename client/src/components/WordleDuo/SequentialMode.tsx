@@ -14,7 +14,7 @@ export function SequentialMode() {
 
 
 
-  // Auto-scroll to bottom when new words are added
+  // Auto-scroll to bottom when new words are added or when it's my turn
   const scrollToBottom = useCallback(() => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
@@ -25,21 +25,27 @@ export function SequentialMode() {
     }
   }, []);
 
-  // Auto-scroll only when new words are added (not on every change)
+  // Auto-scroll when new words are added or when it's my turn
   const [lastHistoryLength, setLastHistoryLength] = useState(0);
   
   useEffect(() => {
     const currentLength = gameState.roomData?.gameHistory?.length || 0;
     
-    // Only scroll if a new word was added (length increased)
+    // Scroll if a new word was added (length increased)
     if (currentLength > lastHistoryLength) {
       setTimeout(scrollToBottom, 100);
       setLastHistoryLength(currentLength);
     } else if (currentLength !== lastHistoryLength) {
-      // Update length without scrolling (for other changes)
       setLastHistoryLength(currentLength);
     }
   }, [gameState.roomData?.gameHistory, scrollToBottom, lastHistoryLength]);
+
+  // Scroll to bottom when it becomes my turn to ensure active row is visible
+  useEffect(() => {
+    if (gameState.isMyTurn) {
+      setTimeout(scrollToBottom, 200);
+    }
+  }, [gameState.isMyTurn, scrollToBottom]);
 
   // Touch-to-type functionality
   const handleLetterInput = useCallback((index: number, letter: string) => {
@@ -218,19 +224,30 @@ export function SequentialMode() {
           </AnimatePresence>
         </div>
 
-        {/* Fixed Height Game History - Max 5 Visible, Scrollable */}
+        {/* Game History + Active Input Row Combined - Fixed Height for 5 rows */}
         <div 
           ref={scrollContainerRef}
-          className="overflow-y-auto scroll-smooth"
+          className="overflow-y-auto scroll-smooth relative"
           style={{
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: isMobile ? 'thin' : 'auto',
-            height: `${maxVisibleRows * (isMobile ? 48 : 64) + (maxVisibleRows - 1) * (isMobile ? 4 : 8)}px`, // Fixed height for exactly 5 rows
+            // Fixed height to show exactly 5 rows + active row
+            height: `${maxVisibleRows * (isMobile ? 48 : 64) + (maxVisibleRows - 1) * (isMobile ? 4 : 8)}px`,
             minHeight: `${maxVisibleRows * (isMobile ? 48 : 64) + (maxVisibleRows - 1) * (isMobile ? 4 : 8)}px`,
             maxHeight: `${maxVisibleRows * (isMobile ? 48 : 64) + (maxVisibleRows - 1) * (isMobile ? 4 : 8)}px`,
           }}
         >
+          {/* Scroll indicator - shows when there are more than 5 words */}
+          {allGridRows.length > maxVisibleRows && (
+            <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-gray-900 to-transparent pointer-events-none z-10 flex items-center justify-center">
+              <div className="text-gray-400 text-xs animate-bounce">
+                ↑ Scroll yukarı
+              </div>
+            </div>
+          )}
+          
           <div className={`space-y-${isMobile ? '1' : '2'} pb-2`}>
+            {/* Previous guesses */}
             {allGridRows.map((row, index) => (
               <motion.div
                 key={`${row.playerId}-${row.rowIndex}`}
@@ -272,97 +289,70 @@ export function SequentialMode() {
                 </div>
               </motion.div>
             ))}
+            
+            {/* Current Active Input Row - Integrated in history */}
+            {gameState.isMyTurn && (
+              <motion.div
+                ref={currentRowRef}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex items-center py-1 ${
+                  isMobile ? 'space-x-2 min-h-12' : 'space-x-4 min-h-16'
+                } border-2 border-blue-500/30 rounded-lg bg-blue-500/5`}
+              >
+                {/* Current Player Indicator */}
+                <div className={`flex items-center flex-shrink-0 ${
+                  isMobile ? 'space-x-1 w-16' : 'space-x-2 w-32'
+                }`}>
+                  <span className={`flex-shrink-0 ${
+                    isMobile ? 'text-base' : 'text-lg sm:text-xl'
+                  }`}>
+                    {gameState.playerData?.avatar}
+                  </span>
+                  {layoutConfig.showFullPlayerInfo && (
+                    <span className={`text-blue-300 truncate min-w-0 font-bold ${
+                      isMobile ? 'text-xs' : 'text-sm sm:text-base'
+                    }`}>
+                      {(gameState.playerData?.name || '').length > layoutConfig.playerNameMaxLength 
+                        ? (gameState.playerData?.name || '').slice(0, layoutConfig.playerNameMaxLength) + '...' 
+                        : gameState.playerData?.name}
+                    </span>
+                  )}
+                </div>
+                
+                {/* Active Typing Row - Letters appear here as you type */}
+                <div className="flex-1">
+                  <LetterGrid
+                    letters={gameState.currentInput ? 
+                      [...gameState.currentInput.split(''), ...Array(5 - gameState.currentInput.length).fill('')] : 
+                      ['', '', '', '', '']
+                    }
+                    statuses={Array(5).fill('empty')}
+                    animate={false}
+                    interactive={false}
+                    compact={layoutConfig.compactMode}
+                  />
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
 
-        {/* Current Input Row - No longer sticky */}
+        {/* Typing Instructions - Below history */}
         {gameState.isMyTurn && (
-          <motion.div
-            ref={currentRowRef}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex-shrink-0 border-t border-white/10 pt-4"
-          >
-            <div className={`flex items-center py-2 ${
-              isMobile ? 'space-x-2 min-h-12' : 'space-x-4 min-h-16'
+          <div className={`flex-shrink-0 text-center ${
+            isMobile ? 'mt-2 mb-1' : 'mt-3 mb-2'
+          }`}>
+            <div className={`inline-flex items-center space-x-2 bg-blue-500/20 text-blue-300 px-3 py-1.5 rounded-full ${
+              isMobile ? 'text-xs' : 'text-sm'
             }`}>
-              {/* Current Player Indicator */}
-              <div className={`flex items-center flex-shrink-0 ${
-                isMobile ? 'space-x-1 w-16' : 'space-x-2 w-32'
-              }`}>
-                <span className={`flex-shrink-0 ${
-                  isMobile ? 'text-base' : 'text-lg sm:text-xl'
-                }`}>
-                  {gameState.playerData?.avatar}
-                </span>
-                {layoutConfig.showFullPlayerInfo && (
-                  <span className={`text-gray-300 truncate min-w-0 font-medium ${
-                    isMobile ? 'text-xs' : 'text-sm sm:text-base'
-                  }`}>
-                    {(gameState.playerData?.name || '').length > layoutConfig.playerNameMaxLength 
-                      ? (gameState.playerData?.name || '').slice(0, layoutConfig.playerNameMaxLength) + '...' 
-                      : gameState.playerData?.name}
-                  </span>
-                )}
-              </div>
-              
-              {/* Interactive Letter Grid with Touch-to-Type */}
-              <div className="flex-1">
-                <LetterGrid
-                  letters={gameState.currentInput ? 
-                    [...gameState.currentInput.split(''), ...Array(5 - gameState.currentInput.length).fill('')] : 
-                    ['', '', '', '', '']
-                  }
-                  statuses={Array(5).fill('empty')}
-                  animate={false}
-                  interactive={true}
-                  onLetterClick={handleEnhancedLetterClick}
-                  onLetterInput={handleLetterInput}
-                  compact={layoutConfig.compactMode}
-                  autoFocus={isMobile}
-                  enableVirtualKeyboard={isMobile}
-                />
-              </div>
+              <span>⌨️</span>
+              <span>Klavyeyi kullanarak yazın</span>
+              <span className="text-blue-400">•</span>
+              <span className="font-semibold">ENTER</span>
+              <span>ile gönderin</span>
             </div>
-            
-            {/* Mobile-Friendly Player Indicators and Hints */}
-            {isMobile && (
-              <div className="space-y-2">
-                {/* Touch interaction hints */}
-                <div className="text-center text-gray-400 text-xs">
-                  💡 Harf kutucuklarına dokunarak yazabilirsiniz
-                </div>
-                
-                {/* Quick player status for mobile */}
-                <div className="flex justify-center space-x-3 text-xs">
-                  {gameState.roomData.players.map((player: any, index: number) => (
-                    <div
-                      key={player.id}
-                      className={`flex items-center space-x-1 px-2 py-1 rounded ${
-                        gameState.roomData!.currentTurn === index
-                          ? 'bg-red-500/20 text-red-300'
-                          : 'text-gray-500'
-                      }`}
-                    >
-                      <span className="text-xs">{player.avatar}</span>
-                      <span className="truncate max-w-12">
-                        {player.name.slice(0, 4)}
-                        {player.name.length > 4 ? '...' : ''}
-                      </span>
-                      {gameState.roomData!.currentTurn === index && (
-                        <div className="w-1 h-1 bg-red-400 rounded-full animate-pulse"></div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Gesture hints */}
-                <div className="text-center text-gray-500 text-xs">
-                  ↕ Scroll to see history • Long press to clear letter
-                </div>
-              </div>
-            )}
-          </motion.div>
+          </div>
         )}
 
         {/* Instructions - Responsive */}
@@ -371,11 +361,9 @@ export function SequentialMode() {
             isMobile ? 'text-xs mt-2' : 'text-sm mt-4'
           }`}>
             <p>Her oyuncu sırayla 5 harfli Türkçe kelime tahmin eder</p>
-            {isMobile && (
-              <p className="mt-1 text-blue-400 text-xs">
-                📱 Mobil için optimize edildi
-              </p>
-            )}
+            <p className={`mt-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+              <span className="text-gray-500">Sıranız geldiğinde klavyeyle yazın</span>
+            </p>
           </div>
         )}
       </motion.div>
