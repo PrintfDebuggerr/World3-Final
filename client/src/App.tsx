@@ -9,13 +9,24 @@ import { MobileLayoutWrapper } from './components/mobile/MobileLayoutWrapper';
 import { motion } from 'framer-motion';
 import './styles/animations.css';
 
-const queryClient = new QueryClient();
+// Optimize QueryClient with better defaults
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
-function AppLayout() {
+// Memoize AppLayout to prevent unnecessary re-renders
+const AppLayout = React.memo(() => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
-      {/* Background Pattern */}
-      <div className="fixed inset-0 opacity-10">
+      {/* Background Pattern - Optimized with will-change */}
+      <div className="fixed inset-0 opacity-10" style={{ willChange: 'transform' }}>
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 25% 25%, #ef4444 0%, transparent 50%),
                            radial-gradient(circle at 75% 75%, #dc2626 0%, transparent 50%)`
@@ -44,7 +55,9 @@ function AppLayout() {
       </Routes>
     </div>
   );
-}
+});
+
+AppLayout.displayName = 'AppLayout';
 
 function App() {
   return (

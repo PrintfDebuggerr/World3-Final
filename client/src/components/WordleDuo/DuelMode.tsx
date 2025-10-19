@@ -9,33 +9,36 @@ import { TurkishKeyboard } from './TurkishKeyboard';
 
 export function DuelMode() {
   const { gameState, handleLetterClick, handleKeyPress } = useWordleDuo();
-  const { orientation, isMobile } = useOrientation();
-  const { metrics, startRenderMeasurement, endRenderMeasurement, isPerformanceGood } = usePerformanceMonitor({
+  const { isMobile } = useOrientation();
+  const { startRenderMeasurement, endRenderMeasurement } = usePerformanceMonitor({
     enableFPSMonitoring: isMobile, // Only monitor FPS on mobile
     enableMemoryMonitoring: true,
     enableRenderTimeMonitoring: isMobile,
   });
   
-  const { getOptimizedVariants, getOptimizedTransition, getHardwareAcceleratedStyle, shouldAnimate } = useOptimizedAnimations();
+  const { getOptimizedTransition, getHardwareAcceleratedStyle, shouldAnimate } = useOptimizedAnimations();
 
   if (!gameState.roomData || !gameState.playerData) return null;
 
   // Remove the portrait mode restriction - allow both orientations
   // Users can play in both portrait and landscape mode
 
-  // Separate grids for each player
-  const player1 = gameState.roomData.players[0];
-  const player2 = gameState.roomData.players[1];
-  const isPlayer1 = gameState.playerData.id === player1?.id;
+  // Memoize player data to avoid recalculation
+  const player2 = React.useMemo(() => gameState.roomData.players[1], [gameState.roomData.players]);
 
-  // Get player's own guesses
-  const myGuesses = gameState.roomData.gameHistory.filter(
-    (h: any) => h.playerId === gameState.playerData?.id
+  // Memoize guesses to avoid filtering on every render
+  const myGuesses = React.useMemo(() => 
+    gameState.roomData.gameHistory.filter(
+      (h: any) => h.playerId === gameState.playerData?.id
+    ),
+    [gameState.roomData.gameHistory, gameState.playerData?.id]
   );
 
-  // Get opponent's guesses (only colors, not letters)
-  const opponentGuesses = gameState.roomData.gameHistory.filter(
-    (h: any) => h.playerId !== gameState.playerData?.id
+  const opponentGuesses = React.useMemo(() =>
+    gameState.roomData.gameHistory.filter(
+      (h: any) => h.playerId !== gameState.playerData?.id
+    ),
+    [gameState.roomData.gameHistory, gameState.playerData?.id]
   );
 
   // Track opponent progress for real-time animations
@@ -53,19 +56,17 @@ export function DuelMode() {
     }
   }, [opponentGuesses.length, previousOpponentCount, isMobile]);
 
-  // Create 6 rows for each player with enhanced mobile features
-  const createPlayerGrid = (guesses: any[], showLetters: boolean, isCurrentPlayer: boolean = false, isOpponent: boolean = false) => {
+  // Memoize grid creation function
+  const createPlayerGrid = React.useCallback((guesses: any[], showLetters: boolean, isCurrentPlayer: boolean = false, isOpponent: boolean = false) => {
     const rows = [];
     
     for (let i = 0; i < 6; i++) {
       const guess = guesses[i];
       if (guess) {
-        // For opponent grid, use compact color-only display on mobile
+        // For opponent grid, show only colored boxes without any characters
         const letters = showLetters 
           ? guess.guess.split('') 
-          : isOpponent && isMobile 
-            ? ['●', '●', '●', '●', '●'] // Use dots for more compact mobile display
-            : ['■', '■', '■', '■', '■']; // Use squares for desktop
+          : ['', '', '', '', '']; // Empty strings - only show colored boxes
         
         rows.push({
           letters,
@@ -106,10 +107,18 @@ export function DuelMode() {
     }
     
     return rows;
-  };
+  }, [isMobile, gameState.currentInput]);
 
-  const myGrid = createPlayerGrid(myGuesses, true, true, false); // showLetters=true, isCurrentPlayer=true, isOpponent=false
-  const opponentGrid = createPlayerGrid(opponentGuesses, false, false, true); // showLetters=false, isCurrentPlayer=false, isOpponent=true
+  // Memoize grids to avoid recreation on every render
+  const myGrid = React.useMemo(() => 
+    createPlayerGrid(myGuesses, true, true, false),
+    [createPlayerGrid, myGuesses]
+  );
+  
+  const opponentGrid = React.useMemo(() => 
+    createPlayerGrid(opponentGuesses, false, false, true),
+    [createPlayerGrid, opponentGuesses]
+  );
 
   // Performance monitoring
   React.useEffect(() => {

@@ -96,8 +96,8 @@ export function LetterGrid({
     }
   }, [virtualKeyboard.state.currentValue, focusedIndex, onLetterInput, letters.length]);
   
-  // Determine size classes based on props and device
-  const getSpacingClass = () => {
+  // Memoize size classes to avoid recalculation on every render
+  const spacingClass = React.useMemo(() => {
     const deviceCategory = mobileUtilities.utils.getDeviceCategory();
     
     if (compact) return "flex justify-center space-x-0.5";
@@ -111,9 +111,9 @@ export function LetterGrid({
       default:
         return "flex justify-center space-x-1 sm:space-x-2";
     }
-  };
+  }, [compact, enlarged]);
 
-  const getSizeClass = () => {
+  const sizeClass = React.useMemo(() => {
     const deviceCategory = mobileUtilities.utils.getDeviceCategory();
     const touchTargetSize = mobileUtilities.utils.getTouchTargetSize();
     
@@ -128,7 +128,7 @@ export function LetterGrid({
       default:
         return 'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-lg sm:text-xl md:text-2xl';
     }
-  };
+  }, [compact, enlarged]);
   
   // Handle letter cell focus
   const handleLetterFocus = useCallback((index: number) => {
@@ -194,7 +194,7 @@ export function LetterGrid({
   }, [focusedIndex, letters.length, handleLetterFocus, onNavigate]);
 
   return (
-    <div className={getSpacingClass()}>
+    <div className={spacingClass}>
       {letters.map((letter, index) => (
         <motion.div
           key={index}
@@ -254,7 +254,7 @@ export function LetterGrid({
           aria-label={interactive ? `Letter cell ${index + 1}` : undefined}
           data-touchable={interactive ? "true" : undefined}
           className={`
-            letter-cell ${getSizeClass()} ${isMobile ? 'letter-cell-mobile' : ''} border-2 rounded-md sm:rounded-lg flex items-center justify-center font-bold transition-colors duration-200
+            letter-cell ${sizeClass} ${isMobile ? 'letter-cell-mobile' : ''} border-2 rounded-md sm:rounded-lg flex items-center justify-center font-bold transition-colors duration-200
             ${statuses[index] === 'correct' ? 'correct' : ''}
             ${statuses[index] === 'present' ? 'present' : ''}
             ${statuses[index] === 'absent' ? 'absent' : ''}
@@ -310,8 +310,6 @@ export function LetterGrid({
           )}
         </motion.div>
       ))}
-      
-
     </div>
   );
 }
