@@ -966,11 +966,12 @@ h-optimized styles */
   }
 }
 
-/* Desktop-specific Duel Mode Grid Layout - Ensure all 6 rows are fully visible */
-@media (min-width: 1024px) {
+/* Desktop-specific Duel Mode Grid Layout - Fully responsive with container-based sizing */
+@media (min-width: 768px) {
   /* Compact the entire duel mode container */
   .duel-mode-container {
     padding: 0;
+    container-type: inline-size;
   }
   
   /* Main grid container - ensure proper height distribution */
@@ -988,7 +989,7 @@ h-optimized styles */
     min-height: 0;
     display: flex;
     align-items: stretch;
-    gap: 2rem;
+    gap: 1rem;
   }
   
   /* Glass card containers for each player */
@@ -996,13 +997,16 @@ h-optimized styles */
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    max-width: 50%;
   }
   
   .duel-grid-wrapper .glass-card {
-    padding: 0.75rem !important;
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-width: 0;
+    padding: 0.5rem !important;
   }
   
   /* Individual player grids - ensure all 6 rows are visible */
@@ -1010,36 +1014,44 @@ h-optimized styles */
   .opponent-grid {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 0.375rem;
-    padding: 0.25rem 0;
+    justify-content: space-evenly;
     min-height: 0;
     flex: 1;
+    gap: 0.25rem;
+    padding: 0.25rem 0;
   }
   
   /* Ensure letter grid rows scale appropriately */
   .player-grid > *,
   .opponent-grid > * {
-    flex: 1 1 0;
+    flex: 0 1 auto;
     min-height: 0;
     display: flex;
     align-items: center;
+    justify-content: center;
   }
   
-  /* Scale down letter cells on desktop to fit all 6 rows */
-  .letter-cell {
-    width: 2.5rem !important;
-    height: 2.5rem !important;
-    font-size: 1rem !important;
-    min-width: 2.5rem !important;
-    min-height: 2.5rem !important;
+  /* Force smaller letter cells in duel mode - use more specific selector */
+  .duel-grid-wrapper .player-grid .letter-cell,
+  .duel-grid-wrapper .opponent-grid .letter-cell {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    font-size: 0.875rem !important;
+    min-width: 2.25rem !important;
+    min-height: 2.25rem !important;
+    max-width: 2.25rem !important;
+    max-height: 2.25rem !important;
   }
   
-  /* Adjust spacing between letter cells */
-  .letter-grid-mobile,
-  .player-grid > * > div,
-  .opponent-grid > * > div {
+  /* Responsive spacing between letter cells */
+  .duel-grid-wrapper .player-grid > * > div {
     gap: 0.25rem !important;
+  }
+  
+  /* Opponent grid - SAME spacing as player grid */
+  .duel-grid-wrapper .opponent-grid > * > div {
+    gap: 0.25rem !important;
+    column-gap: 0.25rem !important;
   }
   
   /* Center opponent grid container */
@@ -1052,6 +1064,8 @@ h-optimized styles */
   .opponent-row > div {
     display: flex;
     justify-content: center;
+    gap: 0.25rem !important;
+    column-gap: 0.25rem !important;
   }
   
   /* Center opponent boxes - no characters, just colors */
@@ -1062,58 +1076,65 @@ h-optimized styles */
   }
   
   .opponent-row .letter-cell span {
-    display: none; /* Hide any text content */
+    display: none;
   }
 }
 
-/* Extra large desktop screens - more comfortable spacing */
+/* Larger screens - slightly bigger cells */
 @media (min-width: 1280px) {
-  .duel-grid-wrapper {
-    gap: 2.5rem;
+  .duel-grid-wrapper .player-grid .letter-cell,
+  .duel-grid-wrapper .opponent-grid .letter-cell {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    font-size: 1rem !important;
+    min-width: 2.75rem !important;
+    min-height: 2.75rem !important;
+    max-width: 2.75rem !important;
+    max-height: 2.75rem !important;
+  }
+  
+  .duel-grid-wrapper .player-grid > * > div {
+    gap: 0.375rem !important;
+  }
+  
+  .duel-grid-wrapper .opponent-grid > * > div,
+  .duel-grid-wrapper .opponent-row > div {
+    gap: 0.375rem !important;
+    column-gap: 0.375rem !important;
+  }
+  
+  .player-grid,
+  .opponent-grid {
+    gap: 0.375rem;
+  }
+}
+
+/* Extra large screens - comfortable cells */
+@media (min-width: 1536px) {
+  .duel-grid-wrapper .player-grid .letter-cell,
+  .duel-grid-wrapper .opponent-grid .letter-cell {
+    width: 3.25rem !important;
+    height: 3.25rem !important;
+    font-size: 1.125rem !important;
+    min-width: 3.25rem !important;
+    min-height: 3.25rem !important;
+    max-width: 3.25rem !important;
+    max-height: 3.25rem !important;
+  }
+  
+  .duel-grid-wrapper .player-grid > * > div {
+    gap: 0.5rem !important;
+  }
+  
+  .duel-grid-wrapper .opponent-grid > * > div,
+  .duel-grid-wrapper .opponent-row > div {
+    gap: 0.5rem !important;
+    column-gap: 0.5rem !important;
   }
   
   .player-grid,
   .opponent-grid {
     gap: 0.5rem;
-    padding: 0.5rem 0;
-  }
-  
-  /* Slightly larger cells on bigger screens */
-  .letter-cell {
-    width: 3rem !important;
-    height: 3rem !important;
-    font-size: 1.125rem !important;
-    min-width: 3rem !important;
-    min-height: 3rem !important;
-  }
-  
-  .letter-grid-mobile,
-  .player-grid > * > div,
-  .opponent-grid > * > div {
-    gap: 0.375rem !important;
-  }
-  
-  /* Center opponent grid container on larger screens */
-  .opponent-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .opponent-row > div {
-    display: flex;
-    justify-content: center;
-  }
-  
-  /* Center opponent boxes on larger screens - no characters, just colors */
-  .opponent-row .letter-cell {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  
-  .opponent-row .letter-cell span {
-    display: none; /* Hide any text content */
   }
 }
 

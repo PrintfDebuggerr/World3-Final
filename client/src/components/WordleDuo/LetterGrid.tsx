@@ -100,8 +100,9 @@ export function LetterGrid({
   const spacingClass = React.useMemo(() => {
     const deviceCategory = mobileUtilities.utils.getDeviceCategory();
     
+    // For compact mode (used in duel mode), use minimal spacing - CSS will handle responsive scaling
     if (compact) return "flex justify-center space-x-0.5";
-    if (enlarged) return "flex justify-center space-x-0.5";
+    if (enlarged) return "flex justify-center space-x-1";
     
     switch (deviceCategory) {
       case 'mobile':
@@ -109,7 +110,7 @@ export function LetterGrid({
       case 'tablet':
         return "flex justify-center space-x-1.5";
       default:
-        return "flex justify-center space-x-1 sm:space-x-2";
+        return "flex justify-center space-x-1 sm:space-x-1.5 md:space-x-2";
     }
   }, [compact, enlarged]);
 
@@ -117,7 +118,8 @@ export function LetterGrid({
     const deviceCategory = mobileUtilities.utils.getDeviceCategory();
     const touchTargetSize = mobileUtilities.utils.getTouchTargetSize();
     
-    if (compact) return 'w-9 h-9 text-sm';
+    // For compact mode (used in duel mode), use minimal sizing - CSS will handle responsive scaling
+    if (compact) return 'w-8 h-8 text-xs';
     if (enlarged) return 'w-10 h-10 text-base';
     
     switch (deviceCategory) {
@@ -126,7 +128,7 @@ export function LetterGrid({
       case 'tablet':
         return 'w-14 h-14 text-xl';
       default:
-        return 'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-lg sm:text-xl md:text-2xl';
+        return 'w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 text-base sm:text-lg md:text-xl lg:text-2xl';
     }
   }, [compact, enlarged]);
   
@@ -194,7 +196,10 @@ export function LetterGrid({
   }, [focusedIndex, letters.length, handleLetterFocus, onNavigate]);
 
   return (
-    <div className={spacingClass}>
+    <div 
+      className={spacingClass}
+      style={compact && !isMobile ? { gap: '0.25rem', columnGap: '0.25rem' } : {}}
+    >
       {letters.map((letter, index) => (
         <motion.div
           key={index}
@@ -267,6 +272,15 @@ export function LetterGrid({
           `}
           style={{
             transformStyle: 'preserve-3d',
+            ...(compact && !isMobile ? {
+              width: '2.25rem',
+              height: '2.25rem',
+              minWidth: '2.25rem',
+              minHeight: '2.25rem',
+              maxWidth: '2.25rem',
+              maxHeight: '2.25rem',
+              fontSize: '0.875rem'
+            } : {})
           }}
         >
           <motion.span

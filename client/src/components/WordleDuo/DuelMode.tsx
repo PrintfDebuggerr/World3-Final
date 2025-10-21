@@ -9,7 +9,9 @@ import { TurkishKeyboard } from './TurkishKeyboard';
 
 export function DuelMode() {
   const { gameState, handleLetterClick, handleKeyPress } = useWordleDuo();
-  const { isMobile } = useOrientation();
+  const { isMobile, isTablet, isDesktop } = useOrientation();
+  // Use desktop layout for tablets and desktops (768px+)
+  const useDesktopLayout = isTablet || isDesktop;
   const { startRenderMeasurement, endRenderMeasurement } = usePerformanceMonitor({
     enableFPSMonitoring: isMobile, // Only monitor FPS on mobile
     enableMemoryMonitoring: true,
@@ -129,9 +131,9 @@ export function DuelMode() {
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden duel-mode-container">
       <div className={`mx-auto h-full flex flex-col w-full ${
-        isMobile 
+        !useDesktopLayout 
           ? 'max-w-none' // No max width restriction on mobile
-          : 'max-w-6xl' // Standard max width on desktop
+          : 'max-w-6xl' // Standard max width on desktop/tablet
       }`}>
         {/* Mode Header */}
         <div className={`flex-shrink-0 text-center ${
@@ -230,7 +232,7 @@ export function DuelMode() {
                       statuses={row.statuses}
                       animate={row.animate}
                       enlarged={false}
-                      compact={isMobile} // Use compact mode on mobile
+                      compact={!useDesktopLayout} // Use compact mode only on mobile (not tablet/desktop)
                       interactive={row.interactive}
                       onLetterClick={row.interactive ? handleLetterClick : undefined}
                     />
@@ -305,7 +307,7 @@ export function DuelMode() {
                         statuses={row.statuses}
                         animate={row.animate}
                         enlarged={false}
-                        compact={isMobile} // Use compact mode on mobile
+                        compact={!useDesktopLayout} // Use compact mode only on mobile (not tablet/desktop)
                         interactive={false}
                         onLetterClick={undefined}
                       />
